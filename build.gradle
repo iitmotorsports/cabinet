@@ -1,0 +1,31 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'java'
+    id 'application'
+}
+
+ext {
+    versionMajor = "1.0"
+    version = "$versionMajor." + ('git rev-list --count HEAD'.execute().text.trim())
+    javalinVersion = "4.4.0"
+    slf4jVersion = "1.8.0-beta4"
+    lombokVersion = "1.18.22"
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.noahhusby.com/releases' }
+}
+
+
+dependencies {
+    implementation "io.javalin:javalin:$javalinVersion"
+    implementation "org.slf4j:slf4j-simple:1.8.0-beta4"
+    
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}
+
+application {
+    mainClass = "edu.iit.fsae.cabinet.Cabinet"
+}
