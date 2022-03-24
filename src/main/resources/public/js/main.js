@@ -23,6 +23,6 @@ $.ajax({
         }
     },
     error: function (jqXHR, textStatus, errorThrown) {
-        alert('Error: ' + textStatus + ' - ' + errorThrown);
+        console.error('Failed to load logs from the API. Make sure the backend is running and has no errors in its console')
     }
 });
