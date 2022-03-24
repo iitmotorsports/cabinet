@@ -12,17 +12,17 @@ $.ajax({
             if (data[i].sheet !== "") {
                 row += '<li><a href="/' + data[i].sheet + '" download title="Download Excel Sheet"><span class="material-icons-outlined">download</span></a></li>';
             }
-            if(data[i].zip !== "") {
+            if (data[i].zip !== "") {
                 row += '<li><a href="/' + data[i].zip + '" download title="Download All as ZIP"><span class="material-icons-outlined">folder_zip</span></button></a></li>';
             }
-            if(data[i].log !== "") {
+            if (data[i].log !== "") {
                 row += '<li><a href="/' + data[i].log + '" target="_blank" title="View Log"><span class="material-icons-outlined">launch</span></a></li>';
             }
             row += '</ul></td></tr>';
             $('#table').append($(row));
         }
     },
-    error: function (jqXHR, textStatus, errorThrown) {
+    error: function () {
         console.error('Failed to load logs from the API. Make sure the backend is running and has no errors in its console')
     }
 });

@@ -34,7 +34,13 @@ a:focus {
     outline: none !important;
 }
 
-a:hover {
+a:hover, a:active {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+a, a:visited {
+    color: inherit;
     text-decoration: none;
 }
 
