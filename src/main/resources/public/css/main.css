@@ -48,7 +48,7 @@ p {
 }
 
 ul, li {
-    margin: 0px;
+    margin: 0;
     list-style-type: none;
 }
 
@@ -96,7 +96,7 @@ li a {
 .cabinet-container {
     width: 100%;
     min-height: 100vh;
-    background: #e6e6e6;
+    background: #26292b;
 
     display: -webkit-box;
     display: -webkit-flex;
@@ -123,7 +123,7 @@ li a {
 table {
     border-spacing: 1;
     border-collapse: collapse;
-    background: white;
+    background: #181a1b;
     border-radius: 10px;
     overflow: hidden;
     width: 100%;
@@ -141,7 +141,7 @@ table td, table th {
 
 table thead tr {
     height: 60px;
-    background: #36304a;
+    background: #1f1f1f;
 }
 
 table tbody tr {
@@ -178,21 +178,15 @@ table td.r, table th.r {
 }
 
 tbody tr:nth-child(even) {
-    background-color: #f5f5f5;
+    background-color: #1e2021;
 }
 
 tbody tr {
     font-family: OpenSans-Regular;
     font-size: 15px;
-    color: #808080;
+    color: #a8a095;
     line-height: 1.2;
     font-weight: unset;
-}
-
-tbody tr:hover {
-    color: #555555;
-    background-color: #f5f5f5;
-    cursor: pointer;
 }
 
 .column1 {
