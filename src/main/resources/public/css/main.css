@@ -196,18 +196,21 @@ tbody tr:hover {
 }
 
 .column1 {
-    width: 200px;
+    width: 60px;
     padding-left: 40px;
 }
 
 .column2 {
-    width: 60px;
+    width: 200px;
 }
 
 .column3 {
     width: 60px;
 }
 
+.column4 {
+    width: 60px;
+}
 
 @media screen and (max-width: 992px) {
     table {
@@ -262,8 +265,9 @@ tbody tr:hover {
 
     .column1,
     .column2,
-    .column3 {
-        width: 100%;
+    .column3,
+    .column4 {
+        width: 100%
     }
 
     tbody tr {
