@@ -252,14 +252,18 @@ tbody tr:hover {
     }
 
     table tbody tr td:nth-child(1):before {
-        content: "Date";
+        content: "ID";
     }
 
     table tbody tr td:nth-child(2):before {
-        content: "Size";
+        content: "Date";
     }
 
     table tbody tr td:nth-child(3):before {
+        content: "Size";
+    }
+
+    table tbody tr td:nth-child(4):before {
         content: "Actions";
     }
 

@@ -4,7 +4,7 @@
 })(jQuery);
 
 $.ajax({
-    url: 'data.json',
+    url: '/api/list_logs',
     dataType: 'json',
     success: function (data) {
         for (var i = 0; i < data.length; i++) {

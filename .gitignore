@@ -165,4 +165,4 @@ modules.xml
 /.idea/sonarlint
 
 /src/main/resources/public/data.json
-
+/src/main/resources/public/log.txt
