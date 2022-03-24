@@ -1,15 +1,8 @@
-/*//////////////////////////////////////////////////////////////////
-[ FONT ]*/
-
-
 @font-face {
     font-family: OpenSans-Regular;
     src: url('../fonts/OpenSans/OpenSans-Regular.ttf');
 }
 
-
-/*//////////////////////////////////////////////////////////////////
-[ RESTYLE TAG ]*/
 * {
     margin: 0;
     padding: 0;
@@ -21,13 +14,14 @@ body, html {
     font-family: sans-serif;
 }
 
-/* ------------------------------------ */
 a {
     margin: 0;
     transition: all 0.4s;
     -webkit-transition: all 0.4s;
     -o-transition: all 0.4s;
     -moz-transition: all 0.4s;
+    color: inherit;
+    text-decoration: none;
 }
 
 a:focus {
@@ -36,21 +30,10 @@ a:focus {
 
 a:hover, a:active {
     color: #ffffff;
-    text-decoration: none;
 }
 
-a, a:visited {
+a:visited {
     color: inherit;
-    text-decoration: none;
-}
-
-/* ------------------------------------ */
-h1, h2, h3, h4, h5, h6 {
-    margin: 0;
-}
-
-p {
-    margin: 0;
 }
 
 ul, li {
@@ -58,45 +41,9 @@ ul, li {
     list-style-type: none;
 }
 
-
-/* ------------------------------------ */
-input {
-    display: block;
-    outline: none;
-    border: none !important;
-}
-
-textarea {
-    display: block;
-    outline: none;
-}
-
-textarea:focus, input:focus {
-    border-color: transparent !important;
-}
-
-/* ------------------------------------ */
-button {
-    outline: none !important;
-    border: none;
-    background: transparent;
-}
-
-button:hover {
-    cursor: pointer;
-}
-
-iframe {
-    border: none !important;
-}
-
-
 li {
     float: left;
-}
-
-li a {
-    padding: 7px;
+    padding-right: 7px;
 }
 
 .cabinet-container {
