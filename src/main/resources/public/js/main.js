@@ -1,8 +1,3 @@
-(function () {
-    "use strict";
-
-})(jQuery);
-
 $.ajax({
     url: '/api/list_logs',
     dataType: 'json',
