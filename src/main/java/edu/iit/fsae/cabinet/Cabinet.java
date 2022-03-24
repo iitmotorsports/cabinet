@@ -24,6 +24,9 @@ public class Cabinet {
 
     protected Cabinet() {
         app = configure();
+        app.post("/api/post", ctx -> {
+
+        });
         app.get("/api/list_logs", ctx -> ctx.json(Constants.GSON.toJson(LogHandler.getInstance().getSortedLogsAsJson())));
     }
 
