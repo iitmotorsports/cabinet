@@ -11,8 +11,8 @@
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
 * {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
@@ -23,7 +23,7 @@ body, html {
 
 /* ------------------------------------ */
 a {
-    margin: 0px;
+    margin: 0;
     transition: all 0.4s;
     -webkit-transition: all 0.4s;
     -o-transition: all 0.4s;
@@ -40,11 +40,11 @@ a:hover {
 
 /* ------------------------------------ */
 h1, h2, h3, h4, h5, h6 {
-    margin: 0px;
+    margin: 0;
 }
 
 p {
-    margin: 0px;
+    margin: 0;
 }
 
 ul, li {
@@ -106,7 +106,7 @@ li a {
     align-content: flex-start;
     justify-content: center;
     flex-wrap: wrap;
-    column-gap: 0px;
+    column-gap: 0;
     padding: 33px 30px;
 }
 
@@ -120,8 +120,13 @@ li a {
     text-align: center;
 }
 
+.logo {
+    width: 500px;
+    height: 124px;
+}
+
 table {
-    border-spacing: 1;
+    border-spacing: inherit;
     border-collapse: collapse;
     background: #181a1b;
     border-radius: 10px;
@@ -170,7 +175,7 @@ table td.r, table th.r {
 
 
 .table100-head th {
-    font-family: OpenSans-Regular;
+    font-family: OpenSans-Regular, sans-serif;
     font-size: 18px;
     color: #fff;
     line-height: 1.2;
@@ -182,7 +187,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr {
-    font-family: OpenSans-Regular;
+    font-family: OpenSans-Regular, sans-serif;
     font-size: 15px;
     color: #a8a095;
     line-height: 1.2;
@@ -234,7 +239,7 @@ tbody tr {
     }
 
     table tbody tr td:before {
-        font-family: OpenSans-Regular;
+        font-family: OpenSans-Regular, serif;
         font-size: 14px;
         color: #999999;
         line-height: 1.2;
@@ -270,6 +275,11 @@ tbody tr {
 
     tbody tr {
         font-size: 14px;
+    }
+
+    .logo {
+        width: 300px;
+        height: 74px;
     }
 }
 
