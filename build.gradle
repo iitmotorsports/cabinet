@@ -11,7 +11,7 @@ ext {
     slf4jVersion = "1.8.0-beta4"
     lombokVersion = "1.18.22"
     gsonVersion = "2.9.0"
-    jacksonVersion = "2.12.4"
+    jacksonVersion = "2.13.2"
 }
 
 repositories {
