@@ -3,7 +3,7 @@
 # cabinet
 
 <p>
-  <b>A cloud-based logging storage system for FSAE.</b>
+  <b>A web-based logging storage system for FSAE.</b>
 </p>
 
 [![](https://github.com/illinois-tech-motorsports/cabinet/actions/workflows/build.yml/badge.svg)](https://github.com/illinois-tech-motorsports/cabinet/actions/workflows/build.yml)
