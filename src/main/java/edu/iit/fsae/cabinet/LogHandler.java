@@ -2,6 +2,7 @@ package edu.iit.fsae.cabinet;
 
 import com.google.gson.JsonArray;
 import edu.iit.fsae.cabinet.entities.Log;
+import edu.iit.fsae.cabinet.entities.Statistic;
 import edu.iit.fsae.cabinet.util.Util;
 import io.javalin.core.util.FileUtil;
 import io.javalin.http.UploadedFile;
@@ -94,7 +95,7 @@ public class LogHandler {
      * @param statsFile
      * @return
      */
-    public Log postNewLog(LocalDateTime date, UploadedFile logFile, UploadedFile statsFile) {
+    public Log postNewLog(LocalDateTime date, UploadedFile logFile, UploadedFile statsFile, UploadedFile statsMapFile) {
         int i = logs.size();
         while (logs.containsKey(i) || workerLogs.containsKey(i)) {
             i++;
@@ -104,7 +105,7 @@ public class LogHandler {
         Cabinet.getLogger().info("Uploaded new log: " + log.getId() + " (w/ log" + (statsFile != null ? " & stats)" : ")"));
         logWorkerThreads.submit(() -> {
             saveLogToManifest(log);
-            saveLogFiles(log, logFile, statsFile);
+            saveLogFiles(log, logFile, statsFile, statsMapFile);
             handleLogStatistics(log);
             handleLogArchive(log);
             workerLogs.remove(log.getId());
@@ -146,13 +147,15 @@ public class LogHandler {
      * @param uploadedLogFile   {@link UploadedFile}
      * @param uploadedStatsFile {@link UploadedFile}
      */
-    private void saveLogFiles(Log log, UploadedFile uploadedLogFile, UploadedFile uploadedStatsFile) {
+    private void saveLogFiles(Log log, UploadedFile uploadedLogFile, UploadedFile uploadedStatsFile, UploadedFile uploadStatsMapFile) {
         File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
         File logFile = new File(parent, log.getId() + ".txt");
         FileUtil.streamToFile(uploadedLogFile.getContent(), logFile.getAbsolutePath());
         if (uploadedStatsFile != null) {
             File statsFile = new File(parent, log.getId() + ".stats");
+            File statsMapFile = new File(parent, log.getId() + ".map.json");
             FileUtil.streamToFile(uploadedStatsFile.getContent(), statsFile.getAbsolutePath());
+            FileUtil.streamToFile(uploadStatsMapFile.getContent(), statsMapFile.getAbsolutePath());
         }
     }
 
@@ -186,9 +189,14 @@ public class LogHandler {
      */
     private void handleLogStatistics(Log log) {
         File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
-        boolean statsExist = Util.doesChildFileExist(parent, log.getId() + ".stats");
+        File statsMap = new File(parent, log.getId() + ".map.json");
+        File stats = new File(parent, log.getId() + ".stats");
         boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
-        if (statsExist && !sheetExist) {
+        if(sheetExist) {
+            log.setDoesSheetExist(true);
+            return;
+        }
+        if (stats.exists() && statsMap.exists()) {
             // TODO: Generation
             // TODO: If successful
             //log.setDoesSheetExist(true);

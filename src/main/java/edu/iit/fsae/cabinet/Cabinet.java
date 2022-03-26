@@ -83,7 +83,11 @@ public class Cabinet {
                 throw new BadRequestResponse("The 'log' file has not been attached.");
             }
             UploadedFile statsFile = ctx.uploadedFile("stats");
-            Log log = LogHandler.getInstance().postNewLog(date, logFile, statsFile);
+            UploadedFile statsMapFile = ctx.uploadedFile("stats_map");
+            if(statsFile != null && statsMapFile == null) {
+                throw new BadRequestResponse("The 'stats' file was attached, but the 'stats_map' file is missing.");
+            }
+            Log log = LogHandler.getInstance().postNewLog(date, logFile, statsFile, statsMapFile);
             ctx.json(Constants.EXPOSED_GSON.toJson(log));
         });
         app.get(Constants.API_V1_PATH + "/fetch_log/{log}", ctx -> {
