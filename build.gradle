@@ -12,6 +12,7 @@ ext {
     lombokVersion = "1.18.22"
     gsonVersion = "2.9.0"
     jacksonVersion = "2.13.2"
+    poiVersion = "5.2.2"
 }
 
 repositories {
@@ -25,6 +26,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "org.apache.poi:poi-ooxml:$poiVersion"
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
