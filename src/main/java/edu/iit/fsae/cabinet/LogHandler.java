@@ -154,7 +154,7 @@ public class LogHandler {
         FileUtil.streamToFile(uploadedLogFile.getContent(), logFile.getAbsolutePath());
         if (uploadedStatsFile != null) {
             File statsFile = new File(parent, log.getId() + ".stats");
-            File statsMapFile = new File(parent, log.getId() + ".map.json");
+            File statsMapFile = new File(parent, log.getId() + ".map.stats");
             FileUtil.streamToFile(uploadedStatsFile.getContent(), statsFile.getAbsolutePath());
             FileUtil.streamToFile(uploadStatsMapFile.getContent(), statsMapFile.getAbsolutePath());
         }
@@ -190,7 +190,7 @@ public class LogHandler {
      */
     private void handleLogStatistics(Log log) {
         File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
-        File statsMap = new File(parent, log.getId() + ".map.json");
+        File statsMap = new File(parent, log.getId() + ".map.stats");
         File stats = new File(parent, log.getId() + ".stats");
         boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
         if (sheetExist) {
@@ -206,9 +206,6 @@ public class LogHandler {
             }
             writer.write(new File(parent, log.getId() + ".xlsx"));
             log.setDoesSheetExist(true);
-            // TODO: Generation
-            // TODO: If successful
-            //log.setDoesSheetExist(true);
         }
     }
 
