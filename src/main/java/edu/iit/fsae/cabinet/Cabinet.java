@@ -72,7 +72,7 @@ public class Cabinet {
                 s.hostedPath = "/files";
             });
         });
-        app.post(Constants.API_V1_PATH + "/post", ctx -> {
+        app.post(Constants.API_V1_PATH + "/logs", ctx -> {
             if (!ctx.queryParamMap().containsKey("date")) {
                 throw new BadRequestResponse("The 'date' parameter has not been set.");
             }
@@ -90,7 +90,7 @@ public class Cabinet {
             Log log = LogHandler.getInstance().postNewLog(date, logFile, statsFile, statsMapFile);
             ctx.json(Constants.EXPOSED_GSON.toJson(log));
         });
-        app.get(Constants.API_V1_PATH + "/fetch_log/{log}", ctx -> {
+        app.get(Constants.API_V1_PATH + "/logs/{log}", ctx -> {
             String id = ctx.pathParam("log");
             if (!Util.isInteger(id)) {
                 throw new BadRequestResponse();
@@ -101,7 +101,7 @@ public class Cabinet {
             }
             ctx.json(Constants.GSON.toJson(log));
         });
-        app.get(Constants.API_V1_PATH + "/list_logs", ctx -> ctx.json(Constants.GSON.toJson(LogHandler.getInstance().getSortedLogsAsJson())));
+        app.get(Constants.API_V1_PATH + "/logs", ctx -> ctx.json(Constants.GSON.toJson(LogHandler.getInstance().getSortedLogsAsJson())));
         return app;
     }
 
