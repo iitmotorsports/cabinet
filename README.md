@@ -16,8 +16,8 @@ Cabinet is a web-based storage system for log files and statistics. The concept 
 
 ## Usage
 Cabinet exposes an easy-to-use REST API for posting / reading logs.
-### Endpoints
-**POST** `/api/v1/logs`
+
+### **POST** `/api/v1/logs`
 
 Params:
 * `date` = Epoch Time (UTC) of when the posted log was created.
@@ -41,7 +41,7 @@ Errors:
   * No `log` file was included in the body.
   * The `stats` file was included, but the `stats_map` file was missing.
 
-**GET** `/api/v1/logs`
+### **GET** `/api/v1/logs`
 
 Example response:
 ```json
@@ -63,7 +63,7 @@ Example response:
 ]
 ```
 
-**GET** `/api/v1/logs/{log id}`
+### **GET** `/api/v1/logs/{log id}`
 
 Example response:
 ```json
