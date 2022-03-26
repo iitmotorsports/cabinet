@@ -38,6 +38,7 @@ public class LogHandler {
 
     protected LogHandler() {
         logWorkerThreads = Executors.newFixedThreadPool(8);
+        Runtime.getRuntime().addShutdownHook(new Thread(logWorkerThreads::shutdown));
     }
 
     /**
