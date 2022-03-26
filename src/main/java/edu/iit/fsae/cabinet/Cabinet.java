@@ -64,7 +64,7 @@ public class Cabinet {
                 s.hostedPath = "/files";
             });
         });
-        app.post("/api/post", ctx -> {
+        app.post(Constants.API_V1_PATH + "post", ctx -> {
             long epoch = ctx.queryParamAsClass("time", Long.class).get();
             LocalDateTime time = Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).toLocalDateTime();
             System.out.println(time.toString());
@@ -73,7 +73,7 @@ public class Cabinet {
                 System.out.println(e.getKey() + ", " + e.getValue().get(0));
             }
         });
-        app.get("/api/list_logs", ctx -> ctx.json(Constants.GSON.toJson(LogHandler.getInstance().getSortedLogsAsJson())));
+        app.get(Constants.API_V1_PATH + "/list_logs", ctx -> ctx.json(Constants.GSON.toJson(LogHandler.getInstance().getSortedLogsAsJson())));
         return app;
     }
 

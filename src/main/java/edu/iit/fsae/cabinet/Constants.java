@@ -13,6 +13,8 @@ public class Constants {
     public static final Gson GSON;
     public static final Gson EXPOSED_GSON;
 
+    public static final String API_V1_PATH = "/api/v1/";
+
     static {
         GSON = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer()).create();
         EXPOSED_GSON = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer()).create();

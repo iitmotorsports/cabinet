@@ -1,5 +1,5 @@
 $.ajax({
-    url: '/api/list_logs',
+    url: '/api/v1/list_logs',
     dataType: 'json',
     success: function (data) {
         for (var i = 0; i < data.length; i++) {
