@@ -25,7 +25,7 @@ Params:
 Body:
 * `log` (File) = Plain-text log file
 * `stats` (File) = Binary log file
-* `stats_map`(File) = Map for binary log file
+* `stats_map` (File) = Map for binary log file
 
 Example response:
 ```json
