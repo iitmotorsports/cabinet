@@ -1,7 +1,6 @@
 package edu.iit.fsae.cabinet.entities;
 
 import com.google.gson.annotations.Expose;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,7 +13,9 @@ public class Log {
     @Expose
     private final int id;
     @Expose
-    private final LocalDateTime time;
+    private final LocalDateTime date;
+    @Expose
+    private final LocalDateTime uploadDate;
     private String size = "0kb";
     private boolean doesSheetExist = false;
 }

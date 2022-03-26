@@ -1,7 +1,6 @@
 package edu.iit.fsae.cabinet;
 
 import io.javalin.Javalin;
-import io.javalin.core.validation.ValidationError;
 import io.javalin.http.staticfiles.Location;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -9,9 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +34,11 @@ public class Cabinet {
 
     protected Cabinet() {
         String filesDirectory = System.getenv("CABINET_DIR");
-        if(filesDirectory == null) {
+        if (filesDirectory == null) {
             filesDirectory = System.getProperty("user.dir");
         }
         folder = new File(filesDirectory, "logs");
-        if(folder.mkdirs()) {
+        if (folder.mkdirs()) {
             logger.info("Storage directory does not exist. Creating at: " + filesDirectory);
         }
         app = configure();
@@ -69,7 +66,7 @@ public class Cabinet {
             LocalDateTime time = Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).toLocalDateTime();
             System.out.println(time.toString());
             System.out.println("Test");
-            for(Map.Entry<String, List<String>> e : ctx.queryParamMap().entrySet()) {
+            for (Map.Entry<String, List<String>> e : ctx.queryParamMap().entrySet()) {
                 System.out.println(e.getKey() + ", " + e.getValue().get(0));
             }
         });

@@ -3,7 +3,7 @@ $.ajax({
     dataType: 'json',
     success: function (data) {
         for (var i = 0; i < data.length; i++) {
-            var date = new Date(parseInt(data[i].time) * 1000)
+            var date = new Date(parseInt(data[i].date) * 1000)
             var row = '<tr><td class="column1">' + data[i].id + '</td><td class="column2">' + date.toLocaleString() + '</td><td class="column3">' + data[i].size + '</td><td class="column4"><ul>';
             var subDir = '/files/' + data[i].id + "/" + data[i].id;
             if (data[i].doesSheetExist) {

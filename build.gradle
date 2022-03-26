@@ -25,7 +25,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    
+
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
