@@ -1,6 +1,10 @@
 package edu.iit.fsae.cabinet;
 
+import edu.iit.fsae.cabinet.entities.Log;
+import edu.iit.fsae.cabinet.util.Util;
 import io.javalin.Javalin;
+import io.javalin.http.BadRequestResponse;
+import io.javalin.http.NotFoundResponse;
 import io.javalin.http.staticfiles.Location;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -61,7 +65,7 @@ public class Cabinet {
                 s.hostedPath = "/files";
             });
         });
-        app.post(Constants.API_V1_PATH + "post", ctx -> {
+        app.post(Constants.API_V1_PATH + "/post", ctx -> {
             long epoch = ctx.queryParamAsClass("time", Long.class).get();
             LocalDateTime time = Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).toLocalDateTime();
             System.out.println(time.toString());
@@ -69,6 +73,17 @@ public class Cabinet {
             for (Map.Entry<String, List<String>> e : ctx.queryParamMap().entrySet()) {
                 System.out.println(e.getKey() + ", " + e.getValue().get(0));
             }
+        });
+        app.get(Constants.API_V1_PATH + "/fetch_log/{log}", ctx -> {
+            String id = ctx.pathParam("log");
+            if (!Util.isInteger(id)) {
+                throw new BadRequestResponse();
+            }
+            Log log = LogHandler.getInstance().getLog(Integer.parseInt(id));
+            if (log == null) {
+                throw new NotFoundResponse();
+            }
+            ctx.json(Constants.GSON.toJson(log));
         });
         app.get(Constants.API_V1_PATH + "/list_logs", ctx -> ctx.json(Constants.GSON.toJson(LogHandler.getInstance().getSortedLogsAsJson())));
         return app;

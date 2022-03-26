@@ -102,4 +102,8 @@ public class LogHandler {
         }
         log.setSize(Util.humanReadableBytes(zip.length()));
     }
+
+    public Log getLog(int id) {
+        return logs.get(id);
+    }
 }
