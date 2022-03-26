@@ -3,16 +3,14 @@ $.ajax({
     dataType: 'json',
     success: function (data) {
         for (var i = 0; i < data.length; i++) {
-            var row = '<tr><td class="column1">' + data[i].id + '</td><td class="column2">' + data[i].date + '</td><td class="column3">' + data[i].size + '</td><td class="column4"><ul>';
-            if (data[i].sheet !== "") {
-                row += '<li><a href="/' + data[i].sheet + '" download title="Download Excel Sheet"><span class="material-icons-outlined">download</span></a></li>';
+            var date = new Date(parseInt(data[i].time) * 1000)
+            var row = '<tr><td class="column1">' + data[i].id + '</td><td class="column2">' + date.toLocaleString() + '</td><td class="column3">' + data[i].size + '</td><td class="column4"><ul>';
+            var subDir = '/files/' + data[i].id + "/" + data[i].id;
+            if (data[i].doesSheetExist) {
+                row += '<li><a href="' + subDir + '.xlsx" download title="Download Excel Sheet"><span class="material-icons-outlined">download</span></a></li>';
             }
-            if (data[i].zip !== "") {
-                row += '<li><a href="/' + data[i].zip + '" download title="Download All as ZIP"><span class="material-icons-outlined">folder_zip</span></button></a></li>';
-            }
-            if (data[i].log !== "") {
-                row += '<li><a href="/' + data[i].log + '" target="_blank" title="View Log"><span class="material-icons-outlined">launch</span></a></li>';
-            }
+            row += '<li><a href="' + subDir + '.zip" download title="Download All as ZIP"><span class="material-icons-outlined">folder_zip</span></button></a></li>';
+            row += '<li><a href="' + subDir + '.txt" target="_blank" title="View Log"><span class="material-icons-outlined">launch</span></a></li>';
             row += '</ul></td></tr>';
             $('#table').append($(row));
         }

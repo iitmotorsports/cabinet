@@ -166,3 +166,4 @@ modules.xml
 
 /src/main/resources/public/data.json
 /src/main/resources/public/log.txt
+/logs/
