@@ -80,6 +80,15 @@ Errors:
   * The specified id is not an integer.
 * 404 Not Found
   * No log could be found for the specified id.
+
+## Deploying
+Cabinet is designed to be deployed as a docker container. Pull the latest container by using:
+```bash
+docker pull noahhusby/cabinet:latest
+```
+Environment variables:
+* `CABINET_DIR` - The persistent directory location for log storage.
+
 ## License
 
 Distributed under the MIT License. See `LICENSE`
