@@ -3,16 +3,22 @@ package edu.iit.fsae.cabinet;
 import com.google.gson.JsonArray;
 import edu.iit.fsae.cabinet.entities.Log;
 import edu.iit.fsae.cabinet.util.Util;
+import io.javalin.core.util.FileUtil;
+import io.javalin.http.UploadedFile;
 import lombok.Getter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A handler for creating, storing, and fetching log files.
@@ -24,8 +30,12 @@ public class LogHandler {
     private static final LogHandler instance = new LogHandler();
 
     private final Map<Integer, Log> logs = new TreeMap<>();
+    private final Map<Integer, Log> workerLogs = new TreeMap<>();
+
+    private final ExecutorService logWorkerThreads;
 
     protected LogHandler() {
+        logWorkerThreads = Executors.newFixedThreadPool(8);
     }
 
     /**
@@ -77,6 +87,76 @@ public class LogHandler {
     }
 
     /**
+     * Posts a new log
+     *
+     * @param date
+     * @param logFile
+     * @param statsFile
+     * @return
+     */
+    public Log postNewLog(LocalDateTime date, UploadedFile logFile, UploadedFile statsFile) {
+        int i = logs.size();
+        while (logs.containsKey(i) || workerLogs.containsKey(i)) {
+            i++;
+        }
+        Log log = new Log(i, date, LocalDateTime.now());
+        workerLogs.put(i, log);
+        Cabinet.getLogger().info("Uploaded new log: " + log.getId() + " (w/ log" + (statsFile != null ? " & stats)" : ")"));
+        logWorkerThreads.submit(() -> {
+            saveLogToManifest(log);
+            saveLogFiles(log, logFile, statsFile);
+            handleLogStatistics(log);
+            handleLogArchive(log);
+            workerLogs.remove(log.getId());
+            logs.put(log.getId(), log);
+        });
+        return log;
+    }
+
+    /**
+     * Saves a log to a manifest file.
+     *
+     * @param log {@link Log}
+     */
+    private void saveLogToManifest(Log log) {
+        File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
+        File manifestFile = new File(parent, "manifest.json");
+        parent.mkdirs();
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(manifestFile);
+            Constants.EXPOSED_GSON.toJson(log, writer);
+        } catch (IOException e) {
+            Cabinet.getLogger().error("Failed to write manifest file for: " + log.getId(), e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * Saves uploaded files to log directory.
+     *
+     * @param log               {@link Log}
+     * @param uploadedLogFile   {@link UploadedFile}
+     * @param uploadedStatsFile {@link UploadedFile}
+     */
+    private void saveLogFiles(Log log, UploadedFile uploadedLogFile, UploadedFile uploadedStatsFile) {
+        File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
+        File logFile = new File(parent, log.getId() + ".txt");
+        FileUtil.streamToFile(uploadedLogFile.getContent(), logFile.getAbsolutePath());
+        if (uploadedStatsFile != null) {
+            File statsFile = new File(parent, log.getId() + ".stats");
+            FileUtil.streamToFile(uploadedStatsFile.getContent(), statsFile.getAbsolutePath());
+        }
+    }
+
+    /**
      * Loads a log file from its manifest file.
      *
      * @param parent       The parent folder of the log.
@@ -94,18 +174,18 @@ public class LogHandler {
             Cabinet.getLogger().warn("Log file missing. Not loading log: " + parent.getName());
             return;
         }
-        handleLogStatistics(parent, log);
-        handleLogArchive(parent, log);
+        handleLogStatistics(log);
+        handleLogArchive(log);
         logs.put(log.getId(), log);
     }
 
     /**
      * Handles the checking and creation of the statistics file.
      *
-     * @param parent Parent folder of log.
-     * @param log    {@link Log}
+     * @param log {@link Log}
      */
-    private void handleLogStatistics(File parent, Log log) {
+    private void handleLogStatistics(Log log) {
+        File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
         boolean statsExist = Util.doesChildFileExist(parent, log.getId() + ".stats");
         boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
         if (statsExist && !sheetExist) {
@@ -118,10 +198,10 @@ public class LogHandler {
     /**
      * Handles the checking and creation of the log archive.
      *
-     * @param parent Parent folder of log.
-     * @param log    {@link Log}
+     * @param log {@link Log}
      */
-    private void handleLogArchive(File parent, Log log) {
+    private void handleLogArchive(Log log) {
+        File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
         File zip = new File(parent, log.getId() + ".zip");
         if (!zip.exists()) {
             try {

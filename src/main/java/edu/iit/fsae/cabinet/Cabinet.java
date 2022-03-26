@@ -5,6 +5,7 @@ import edu.iit.fsae.cabinet.util.Util;
 import io.javalin.Javalin;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.NotFoundResponse;
+import io.javalin.http.UploadedFile;
 import io.javalin.http.staticfiles.Location;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -14,8 +15,6 @@ import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Noah Husby
@@ -74,13 +73,18 @@ public class Cabinet {
             });
         });
         app.post(Constants.API_V1_PATH + "/post", ctx -> {
-            long epoch = ctx.queryParamAsClass("time", Long.class).get();
-            LocalDateTime time = Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).toLocalDateTime();
-            System.out.println(time.toString());
-            System.out.println("Test");
-            for (Map.Entry<String, List<String>> e : ctx.queryParamMap().entrySet()) {
-                System.out.println(e.getKey() + ", " + e.getValue().get(0));
+            if (!ctx.queryParamMap().containsKey("date")) {
+                throw new BadRequestResponse("The 'date' parameter has not been set.");
             }
+            long epoch = ctx.queryParamAsClass("date", Long.class).get();
+            LocalDateTime date = Instant.ofEpochSecond(epoch).atOffset(ZoneOffset.UTC).toLocalDateTime();
+            UploadedFile logFile = ctx.uploadedFile("log");
+            if (logFile == null) {
+                throw new BadRequestResponse("The 'log' file has not been attached.");
+            }
+            UploadedFile statsFile = ctx.uploadedFile("stats");
+            Log log = LogHandler.getInstance().postNewLog(date, logFile, statsFile);
+            ctx.json(Constants.EXPOSED_GSON.toJson(log));
         });
         app.get(Constants.API_V1_PATH + "/fetch_log/{log}", ctx -> {
             String id = ctx.pathParam("log");
