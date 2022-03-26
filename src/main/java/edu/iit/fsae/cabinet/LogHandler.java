@@ -3,6 +3,7 @@ package edu.iit.fsae.cabinet;
 import com.google.gson.JsonArray;
 import edu.iit.fsae.cabinet.entities.Log;
 import edu.iit.fsae.cabinet.entities.Statistic;
+import edu.iit.fsae.cabinet.util.StatisticsSheetWriter;
 import edu.iit.fsae.cabinet.util.Util;
 import io.javalin.core.util.FileUtil;
 import io.javalin.http.UploadedFile;
@@ -192,11 +193,19 @@ public class LogHandler {
         File statsMap = new File(parent, log.getId() + ".map.json");
         File stats = new File(parent, log.getId() + ".stats");
         boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
-        if(sheetExist) {
+        if (sheetExist) {
             log.setDoesSheetExist(true);
             return;
         }
         if (stats.exists() && statsMap.exists()) {
+            StatisticsSheetWriter writer = new StatisticsSheetWriter(stats, statsMap);
+            try {
+                writer.parse();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            writer.write(new File(parent, log.getId() + ".xlsx"));
+            log.setDoesSheetExist(true);
             // TODO: Generation
             // TODO: If successful
             //log.setDoesSheetExist(true);

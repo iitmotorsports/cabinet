@@ -84,7 +84,7 @@ public class Cabinet {
             }
             UploadedFile statsFile = ctx.uploadedFile("stats");
             UploadedFile statsMapFile = ctx.uploadedFile("stats_map");
-            if(statsFile != null && statsMapFile == null) {
+            if (statsFile != null && statsMapFile == null) {
                 throw new BadRequestResponse("The 'stats' file was attached, but the 'stats_map' file is missing.");
             }
             Log log = LogHandler.getInstance().postNewLog(date, logFile, statsFile, statsMapFile);

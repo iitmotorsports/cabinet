@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -90,5 +91,33 @@ public class Util {
         }
         value *= Long.signum(bytes);
         return String.format("%.1f %ciB", value / 1024.0, ci.current());
+    }
+
+    /**
+     * Creates a new entry.
+     *
+     * @param key   Key of entry.
+     * @param value Value of entry.
+     * @param <K>   The type of the key.
+     * @param <V>   The type of the value.
+     * @return {@link Map.Entry}
+     */
+    public static <K, V> Map.Entry<K, V> entry(K key, V value) {
+        return new Map.Entry<>() {
+            @Override
+            public K getKey() {
+                return key;
+            }
+
+            @Override
+            public V getValue() {
+                return value;
+            }
+
+            @Override
+            public V setValue(V value) {
+                return null;
+            }
+        };
     }
 }
