@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 /**
+ * A handler for creating, storing, and fetching log files.
+ *
  * @author Noah Husby
  */
 public class LogHandler {
@@ -26,12 +28,22 @@ public class LogHandler {
     protected LogHandler() {
     }
 
+    /**
+     * Gets logs reverse sorted by id.
+     *
+     * @return Map of Integer, Log.
+     */
     public Map<Integer, Log> getSortedLogs() {
         Map<Integer, Log> temp = new TreeMap<>(Collections.reverseOrder());
         temp.putAll(logs);
         return temp;
     }
 
+    /**
+     * Gets logs reverse sorted by id as a JsonArray.
+     *
+     * @return {@link JsonArray} of sorted logs.
+     */
     public JsonArray getSortedLogsAsJson() {
         JsonArray array = new JsonArray();
         getSortedLogs().values().forEach(log -> array.add(Constants.GSON.toJsonTree(log)));
@@ -39,7 +51,7 @@ public class LogHandler {
     }
 
     /**
-     * Loads logs from set working directory
+     * Loads logs from set working directory.
      */
     public void load() {
         Cabinet.getLogger().info("Loading logs...");
@@ -64,6 +76,12 @@ public class LogHandler {
         Cabinet.getLogger().info(String.format("Loaded %d logs", logs.size()));
     }
 
+    /**
+     * Loads a log file from its manifest file.
+     *
+     * @param parent       The parent folder of the log.
+     * @param manifestFile The manifest file of the log.
+     */
     private void loadLogFromManifest(File parent, File manifestFile) {
         Log log;
         try {
@@ -81,6 +99,12 @@ public class LogHandler {
         logs.put(log.getId(), log);
     }
 
+    /**
+     * Handles the checking and creation of the statistics file.
+     *
+     * @param parent Parent folder of log.
+     * @param log    {@link Log}
+     */
     private void handleLogStatistics(File parent, Log log) {
         boolean statsExist = Util.doesChildFileExist(parent, log.getId() + ".stats");
         boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
@@ -91,6 +115,12 @@ public class LogHandler {
         }
     }
 
+    /**
+     * Handles the checking and creation of the log archive.
+     *
+     * @param parent Parent folder of log.
+     * @param log    {@link Log}
+     */
     private void handleLogArchive(File parent, Log log) {
         File zip = new File(parent, log.getId() + ".zip");
         if (!zip.exists()) {
@@ -103,6 +133,12 @@ public class LogHandler {
         log.setSize(Util.humanReadableBytes(zip.length()));
     }
 
+    /**
+     * Gets a {@link Log} by its id number.
+     *
+     * @param id Id of log.
+     * @return {@link Log} if exists, null otherwise.
+     */
     public Log getLog(int id) {
         return logs.get(id);
     }

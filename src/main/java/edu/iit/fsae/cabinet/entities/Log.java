@@ -6,6 +6,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
+ * Represents the metadata of a log
+ *
  * @author Noah Husby
  */
 @Data

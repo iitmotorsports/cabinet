@@ -48,6 +48,9 @@ public class Cabinet {
         app = configure();
     }
 
+    /**
+     * Starts the Cabinet server.
+     */
     private void start() {
         LogHandler.getInstance().load();
         logger.info("Starting server...");
@@ -55,6 +58,11 @@ public class Cabinet {
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
     }
 
+    /**
+     * Creates a new Javalin instance with set endpoints.
+     *
+     * @return {@link Javalin}
+     */
     private Javalin configure() {
         Javalin app = Javalin.create(config -> {
             config.showJavalinBanner = false;

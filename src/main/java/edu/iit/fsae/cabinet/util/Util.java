@@ -1,5 +1,7 @@
 package edu.iit.fsae.cabinet.util;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,8 +13,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
+ * A utility class
+ *
  * @author Noah Husby
  */
+@UtilityClass
 public class Util {
     /**
      * Checks if a string can be parsed as an integer

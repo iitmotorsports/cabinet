@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 /**
+ * Util class to serialize {@link LocalDateTime} as UNIX Epoch.
+ *
  * @author Noah Husby
  */
 public class LocalDateTimeSerializer implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {

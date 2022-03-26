@@ -3,12 +3,14 @@ package edu.iit.fsae.cabinet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import edu.iit.fsae.cabinet.util.LocalDateTimeSerializer;
+import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
 
 /**
  * @author Noah Husby
  */
+@UtilityClass
 public class Constants {
     public static final Gson GSON;
     public static final Gson EXPOSED_GSON;
