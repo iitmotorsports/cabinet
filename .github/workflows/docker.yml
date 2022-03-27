@@ -22,4 +22,4 @@ jobs:
       - name: Docker push tag
         run: docker push noahhusby/cabinet:$(git rev-parse --short HEAD)
       - name: Docker push latest
-        run: docker push
+        run: docker push noahhusby/cabinet:latest
