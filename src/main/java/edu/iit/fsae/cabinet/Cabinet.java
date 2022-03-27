@@ -53,7 +53,7 @@ public class Cabinet {
     private void start() {
         LogHandler.getInstance().load();
         logger.info("Starting server...");
-        app.start(7000);
+        app.start(80);
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
     }
 

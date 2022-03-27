@@ -4,6 +4,8 @@ plugins {
     id 'application'
 }
 
+mainClassName = 'edu.iit.fsae.cabinet.Cabinet'
+
 ext {
     versionMajor = "1.0"
     version = "$versionMajor." + ('git rev-list --count HEAD'.execute().text.trim())
@@ -31,6 +33,6 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
 
-application {
-    mainClass = "edu.iit.fsae.cabinet.Cabinet"
+shadowJar {
+    archiveFileName = "cabinet.jar"
 }
