@@ -8,7 +8,6 @@ FROM openjdk:17-alpine
 EXPOSE 80
 
 RUN mkdir /app
-COPY --from=build /home/gradle/src/build/libs/*.jar /app/
-RUN mv /app/*.jar cabinet.jar
+COPY --from=build /home/gradle/src/build/libs/cabinet-all*.jar /app/cabinet-all.jar
 
-ENTRYPOINT ["java","/app/cabinet.jar"]
+ENTRYPOINT ["java","/app/cabinet-all.jar"]
