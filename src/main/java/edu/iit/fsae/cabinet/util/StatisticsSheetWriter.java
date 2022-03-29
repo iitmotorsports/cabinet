@@ -87,7 +87,7 @@ public class StatisticsSheetWriter {
      *
      * @param file The file to written to.
      */
-    public void write(File file) {
+    public void write(File file) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Statistics");
 
@@ -141,13 +141,8 @@ public class StatisticsSheetWriter {
         }
 
         chart.plot(data);
-
-        try {
-            FileOutputStream outputStream = new FileOutputStream(file);
-            workbook.write(outputStream);
-            workbook.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        FileOutputStream outputStream = new FileOutputStream(file);
+        workbook.write(outputStream);
+        workbook.close();
     }
 }

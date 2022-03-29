@@ -190,23 +190,23 @@ public class LogHandler {
      * @param log {@link Log}
      */
     private void handleLogStatistics(Log log) {
-        File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
-        File statsMap = new File(parent, log.getId() + ".map.stats");
-        File stats = new File(parent, log.getId() + ".stats");
-        boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
-        if (sheetExist) {
-            log.setDoesSheetExist(true);
-            return;
-        }
-        if (stats.exists() && statsMap.exists()) {
-            StatisticsSheetWriter writer = new StatisticsSheetWriter(stats, statsMap);
-            try {
-                writer.parse();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try {
+            File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
+            File statsMap = new File(parent, log.getId() + ".map.stats");
+            File stats = new File(parent, log.getId() + ".stats");
+            boolean sheetExist = Util.doesChildFileExist(parent, log.getId() + ".xlsx");
+            if (sheetExist) {
+                log.setDoesSheetExist(true);
+                return;
             }
-            writer.write(new File(parent, log.getId() + ".xlsx"));
-            log.setDoesSheetExist(true);
+            if (stats.exists() && statsMap.exists()) {
+                StatisticsSheetWriter writer = new StatisticsSheetWriter(stats, statsMap);
+                writer.parse();
+                writer.write(new File(parent, log.getId() + ".xlsx"));
+                log.setDoesSheetExist(true);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
