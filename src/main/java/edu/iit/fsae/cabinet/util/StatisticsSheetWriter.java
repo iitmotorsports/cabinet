@@ -108,7 +108,10 @@ public class StatisticsSheetWriter {
             Row row = sheet.createRow(currentRow);
             row.createCell(0).setCellValue(e.getKey());
             for (Map.Entry<String, Integer> e2 : e.getValue().entrySet()) {
-                row.createCell(headerMap.get(e2.getKey())).setCellValue(e2.getValue());
+                try {
+                    row.createCell(headerMap.get(e2.getKey())).setCellValue(e2.getValue());
+                } catch (NullPointerException ignored) {
+                }
             }
             currentRow++;
         }
