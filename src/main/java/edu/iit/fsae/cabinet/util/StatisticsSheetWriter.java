@@ -107,10 +107,11 @@ public class StatisticsSheetWriter {
      */
     public void write(File file) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet("Statistics");
+        XSSFSheet breakdown = workbook.createSheet("Breakdown");
+        XSSFSheet raw = workbook.createSheet("Raw");
 
         // Create Header
-        Row headerRow = sheet.createRow(0);
+        Row headerRow = raw.createRow(0);
         headerRow.createCell(0).setCellValue("Timestamp");
         int currentHeaderColumn = 1;
         // Stat ID as String | Header column
@@ -123,7 +124,7 @@ public class StatisticsSheetWriter {
 
         int currentRow = 1;
         for (Map.Entry<Long, Map<String, Integer>> e : statistics.entrySet()) {
-            Row row = sheet.createRow(currentRow);
+            Row row = raw.createRow(currentRow);
             row.createCell(0).setCellValue(e.getKey());
             for (Map.Entry<String, Integer> e2 : e.getValue().entrySet()) {
                 try {
@@ -135,7 +136,7 @@ public class StatisticsSheetWriter {
         }
 
         // Generate chart
-        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+        XSSFDrawing drawing = breakdown.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 0, 15, 26);
         XSSFChart chart = drawing.createChart(anchor);
         chart.setTitleText("Statistics");
@@ -150,11 +151,11 @@ public class StatisticsSheetWriter {
         leftAxis.setTitle("Value");
 
         XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
-        int rows = sheet.getPhysicalNumberOfRows();
-        XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rows - 1, 0, 0));
+        int rows = raw.getPhysicalNumberOfRows();
+        XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 0, 0));
 
         for (Map.Entry<String, Integer> e : headerMap.entrySet()) {
-            XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(1, rows - 1, e.getValue(), e.getValue()));
+            XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, e.getValue(), e.getValue()));
             XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(timestamps, dataSource);
             series.setTitle(statisticsMap.get(e.getKey()), null);
             series.setSmooth(false);
