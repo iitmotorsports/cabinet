@@ -187,6 +187,11 @@ public class StatisticsSheetWriter {
      * Overview
      */
 
+    /**
+     * Creates the overview tab and elements.
+     *
+     * @param workbook The current session's workbook.
+     */
     private void overview(XSSFWorkbook workbook) {
         XSSFSheet overview = workbook.createSheet("Overview");
         overviewTitleBlock(workbook, overview);
@@ -195,6 +200,12 @@ public class StatisticsSheetWriter {
         overviewMenu(workbook, overview);
     }
 
+    /**
+     * Generates the title block and information for the session.
+     *
+     * @param workbook The current session's workbook.
+     * @param sheet    The overview tab.
+     */
     private void overviewTitleBlock(XSSFWorkbook workbook, Sheet sheet) {
         sheet.addMergedRegion(CellRangeAddress.valueOf("B2:E2"));
         sheet.addMergedRegion(CellRangeAddress.valueOf("C3:E3"));
@@ -247,6 +258,12 @@ public class StatisticsSheetWriter {
         setBorder(CellRangeAddress.valueOf("B2:E5"), sheet);
     }
 
+    /**
+     * Generates the quick-view statistics on the overview page.
+     *
+     * @param workbook The current session's workbook.
+     * @param sheet    The overview tab.
+     */
     private void overviewValues(XSSFWorkbook workbook, Sheet sheet) {
         Row r6 = sheet.createRow(6);
         Cell header = r6.createCell(1);
@@ -272,6 +289,15 @@ public class StatisticsSheetWriter {
         setBorder(CellRangeAddress.valueOf("B7:E" + (i - 1)), sheet);
     }
 
+    /**
+     * Adds a specified statistic to the chart using a {@link TrackingPolicy}
+     *
+     * @param sheet  The overview tab.
+     * @param rowNo  The row number of where to print the data.
+     * @param title  A descriptive title of the statistic.
+     * @param suffix The suffix of the value.
+     * @param stat   The statistic id.
+     */
     private void addOverviewStatistic(Sheet sheet, int rowNo, String title, String suffix, String stat) {
         sheet.addMergedRegion(CellRangeAddress.valueOf(String.format("B%s:C%s", rowNo, rowNo)));
         sheet.addMergedRegion(CellRangeAddress.valueOf(String.format("D%s:E%s", rowNo, rowNo)));
@@ -287,6 +313,12 @@ public class StatisticsSheetWriter {
         setBorder(CellRangeAddress.valueOf(String.format("D%s:E%s", rowNo, rowNo)), sheet);
     }
 
+    /**
+     * Generates image block for the overview.
+     *
+     * @param workbook The current session's workbook.
+     * @param sheet    The overview tab.
+     */
     private void overviewImageBlock(XSSFWorkbook workbook, Sheet sheet) {
         sheet.addMergedRegion(CellRangeAddress.valueOf("G2:J8"));
         Row row = sheet.getRow(1);
@@ -336,6 +368,12 @@ public class StatisticsSheetWriter {
         setBorder(CellRangeAddress.valueOf("G2:J8"), sheet);
     }
 
+    /**
+     * Generates the menu for the overview page.
+     *
+     * @param workbook The current session's workbook.
+     * @param sheet    The overview tab.
+     */
     private void overviewMenu(XSSFWorkbook workbook, Sheet sheet) {
         Row r9 = sheet.getRow(9);
         Cell header = r9.createCell(6);
@@ -356,6 +394,14 @@ public class StatisticsSheetWriter {
         setBorder(CellRangeAddress.valueOf("G10:J13"), sheet);
     }
 
+    /**
+     * Adds a menu element to the overview.
+     *
+     * @param sheet       The overview tab.
+     * @param rowNo       The row number of where the menu element should be printed.
+     * @param name        The name (and ID) of the specific tab.
+     * @param description A description of the page.
+     */
     private void addOverviewMenu(Sheet sheet, int rowNo, String name, String description) {
         sheet.addMergedRegion(CellRangeAddress.valueOf(String.format("H%s:J%s", rowNo, rowNo)));
         Row row = sheet.getRow(rowNo - 1);
@@ -379,6 +425,12 @@ public class StatisticsSheetWriter {
      * Visual
      */
 
+    /**
+     * Creates the visual tab and elements.
+     *
+     * @param workbook  The current session's workbook.
+     * @param headerMap A list of the statistics and their associated spreadsheet column.
+     */
     private void visual(XSSFWorkbook workbook, Map<String, Integer> headerMap) {
         XSSFSheet visual = workbook.createSheet("Visual");
         XSSFSheet raw = workbook.getSheet("Raw");
@@ -393,6 +445,19 @@ public class StatisticsSheetWriter {
         }
     }
 
+    /**
+     * Adds a graph to the visual page.
+     *
+     * @param title      The title of the graph.
+     * @param statistics An array of all statistics to graph.
+     * @param col1       Upper left-hand anchor.
+     * @param row1       Upper left-hand anchor.
+     * @param col2       Lower right-hand anchor.
+     * @param row2       Lower right-hand anchor.
+     * @param visual     The visual tab.
+     * @param raw        The raw tab.
+     * @param headerMap  A list of the statistics and their associated spreadsheet column.
+     */
     private void addVisualGraph(String title, String[] statistics, int col1, int row1, int col2, int row2, XSSFSheet visual, XSSFSheet raw, Map<String, Integer> headerMap) {
         XSSFDrawing drawing = visual.createDrawingPatriarch();
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, col1, row1, col2, row2);
@@ -428,6 +493,13 @@ public class StatisticsSheetWriter {
         legend.setPosition(LegendPosition.BOTTOM);
     }
 
+    /**
+     * Gets the column of a statistic from its ID.
+     *
+     * @param statistic The ID of the statistic.
+     * @param headerMap A list of the statistics and their associated spreadsheet column.
+     * @return The column number if the statistic exists, -1 otherwise.
+     */
     private int getRowFromStatistic(String statistic, Map<String, Integer> headerMap) {
         for (Map.Entry<String, String> e : statisticsMap.entrySet()) {
             if (e.getValue().equalsIgnoreCase(statistic)) {
@@ -437,6 +509,12 @@ public class StatisticsSheetWriter {
         return -1;
     }
 
+    /**
+     * Formats a cell as a link.
+     *
+     * @param workbook The current session's workbook.
+     * @param cell     The cell to be formatted as a link.
+     */
     private void formatAsLink(Workbook workbook, Cell cell) {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
@@ -446,6 +524,12 @@ public class StatisticsSheetWriter {
         cell.setCellStyle(style);
     }
 
+    /**
+     * Formats a cell as a link.
+     *
+     * @param region
+     * @param sheet
+     */
     private void setBorder(CellRangeAddress region, Sheet sheet) {
         RegionUtil.setBorderBottom(BorderStyle.MEDIUM, region, sheet);
         RegionUtil.setBorderLeft(BorderStyle.MEDIUM, region, sheet);
