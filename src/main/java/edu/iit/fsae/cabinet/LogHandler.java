@@ -51,8 +51,6 @@ public class LogHandler {
     private static final LogHandler instance = new LogHandler();
 
     private final Map<Integer, Log> logs = new TreeMap<>();
-    private final Map<Integer, Log> workerLogs = new TreeMap<>();
-
     private final ExecutorService logWorkerThreads;
 
     protected LogHandler() {
@@ -119,19 +117,17 @@ public class LogHandler {
      */
     public Log postNewLog(LocalDateTime date, UploadedFile logFile, UploadedFile statsFile, UploadedFile statsMapFile) {
         int i = logs.size();
-        while (logs.containsKey(i) || workerLogs.containsKey(i)) {
+        while (logs.containsKey(i)) {
             i++;
         }
         Log log = new Log(i, date, LocalDateTime.now());
-        workerLogs.put(i, log);
         Cabinet.getLogger().info("Uploaded new log: " + log.getId() + " (w/ log" + (statsFile != null ? " & stats)" : ")"));
         logWorkerThreads.submit(() -> {
             saveLogToManifest(log);
             saveLogFiles(log, logFile, statsFile, statsMapFile);
+            logs.put(log.getId(), log);
             handleLogStatistics(log);
             handleLogArchive(log);
-            workerLogs.remove(log.getId());
-            logs.put(log.getId(), log);
         });
         return log;
     }
