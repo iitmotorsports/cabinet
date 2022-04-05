@@ -218,9 +218,12 @@ public class LogHandler {
                 return;
             }
             if (stats.exists() && statsMap.exists()) {
+                long start = System.currentTimeMillis();
+                Cabinet.getLogger().info("Generating excel sheet for Log #" + log.getId() + " ...");
                 StatisticsSheetWriter writer = new StatisticsSheetWriter(log, stats, statsMap);
                 writer.parse();
                 writer.write(new File(parent, log.getId() + ".xlsx"));
+                Cabinet.getLogger().info("Finished generating excel sheet in " + (System.currentTimeMillis() - start) + " ms.");
                 log.setDoesSheetExist(true);
             }
         } catch (IOException e) {
