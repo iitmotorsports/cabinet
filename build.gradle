@@ -15,6 +15,7 @@ ext {
     gsonVersion = "2.9.0"
     jacksonVersion = "2.13.2"
     poiVersion = "5.2.2"
+    log4jToSlf4jVersion = "2.17.2"
 }
 
 repositories {
@@ -29,6 +30,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     implementation "org.apache.poi:poi-ooxml:$poiVersion"
     implementation "org.apache.poi:poi-ooxml-full:$poiVersion"
+    implementation "org.apache.logging.log4j:log4j-to-slf4j:$log4jToSlf4jVersion"
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
