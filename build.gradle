@@ -28,6 +28,7 @@ dependencies {
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
     implementation "org.apache.poi:poi-ooxml:$poiVersion"
+    implementation "org.apache.poi:poi-ooxml-full:$poiVersion"
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

@@ -37,6 +37,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
@@ -148,7 +149,8 @@ public class StatisticsSheetWriter {
         // Create Header
         Row headerRow = raw.createRow(0);
         headerRow.createCell(0).setCellValue("Timestamp");
-        int currentHeaderColumn = 1;
+        headerRow.createCell(1).setCellValue("Time (Seconds)");
+        int currentHeaderColumn = 2;
         // Stat ID as String | Header column
         Map<String, Integer> headerMap = new HashMap<>();
         for (Map.Entry<String, String> e : statisticsMap.entrySet()) {
@@ -157,10 +159,13 @@ public class StatisticsSheetWriter {
             currentHeaderColumn++;
         }
 
+        long offset = statistics.keySet().iterator().next();
+
         int currentRow = 1;
         for (Map.Entry<Long, Map<String, Integer>> e : statistics.entrySet()) {
             Row row = raw.createRow(currentRow);
             row.createCell(0).setCellValue(e.getKey());
+            row.createCell(1).setCellValue(Math.ceil((e.getKey() - offset) / 1000.00));
             for (Map.Entry<String, Integer> e2 : e.getValue().entrySet()) {
                 try {
                     row.createCell(headerMap.get(e2.getKey())).setCellValue(e2.getValue());
@@ -294,6 +299,8 @@ public class StatisticsSheetWriter {
             byte[] rgb = { (byte) 187, 2, 0 };
             font.setColor(new XSSFColor(rgb, new DefaultIndexedColorMap()));
             style.setFont(font);
+            // TODO: Remove vertical alignment once logo is fixed.
+            style.setVerticalAlignment(VerticalAlignment.CENTER);
             style.setAlignment(HorizontalAlignment.CENTER);
             imageDescription.setCellStyle(style);
         }
@@ -394,14 +401,15 @@ public class StatisticsSheetWriter {
         chart.setTitleOverlay(false);
 
         XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        bottomAxis.setTitle("Time");
+        bottomAxis.setTitle("Time (seconds)");
         XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
         leftAxis.setTitle("Value");
 
         XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
         data.setVaryColors(false);
         int rows = raw.getPhysicalNumberOfRows();
-        XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 0, 0));
+        int skip = rows / 12;
+        XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 1, 1));
 
         for (String statistic : statistics) {
             int statColumn = getRowFromStatistic(statistic, headerMap);
@@ -414,6 +422,9 @@ public class StatisticsSheetWriter {
 
         chart.plot(data);
         XDDFChartLegend legend = chart.getOrAddLegend();
+        chart.getCTChart().getPlotArea().getCatAxArray(0).addNewTickLblSkip().setVal(skip);
+        chart.getCTChart().getPlotArea().getCatAxArray(0).addNewTickMarkSkip().setVal(skip);
+
         legend.setPosition(LegendPosition.BOTTOM);
     }
 
