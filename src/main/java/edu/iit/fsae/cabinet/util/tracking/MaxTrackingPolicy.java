@@ -31,7 +31,7 @@ public class MaxTrackingPolicy implements TrackingPolicy {
 
     @Override
     public void post(long value) {
-        if(value > this.value) {
+        if (value > this.value) {
             this.value = value;
         }
     }

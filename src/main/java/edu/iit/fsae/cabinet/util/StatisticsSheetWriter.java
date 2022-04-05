@@ -40,6 +40,23 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.ChartTypes;
+import org.apache.poi.xddf.usermodel.chart.LegendPosition;
+import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
+import org.apache.poi.xddf.usermodel.chart.XDDFCategoryAxis;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartLegend;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFLineChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -153,46 +170,23 @@ public class StatisticsSheetWriter {
             currentRow++;
         }
 
-        /*
-        // Generate chart
-        XSSFDrawing drawing = breakdown.createDrawingPatriarch();
-        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 7, 15, 26);
-        XSSFChart chart = drawing.createChart(anchor);
-        chart.setTitleText("Statistics");
-        chart.setTitleOverlay(false);
+        visual(workbook, headerMap);
 
-        XDDFChartLegend legend = chart.getOrAddLegend();
-        legend.setPosition(LegendPosition.BOTTOM);
-
-        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        bottomAxis.setTitle("Time");
-        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-        leftAxis.setTitle("Value");
-
-        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
-        int rows = raw.getPhysicalNumberOfRows();
-        XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 0, 0));
-
-        for (Map.Entry<String, Integer> e : headerMap.entrySet()) {
-            XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, e.getValue(), e.getValue()));
-            XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(timestamps, dataSource);
-            series.setTitle(statisticsMap.get(e.getKey()), null);
-            series.setSmooth(false);
-            series.setMarkerStyle(MarkerStyle.NONE);
-        }
-
-        chart.plot(data);
-
-         */
         FileOutputStream outputStream = new FileOutputStream(file);
         workbook.write(outputStream);
         workbook.close();
     }
 
+    /*
+     * Overview
+     */
+
     private void overview(XSSFWorkbook workbook) {
-        XSSFSheet breakdown = workbook.createSheet("Breakdown");
-        overviewTitleBlock(workbook, breakdown);
-        overviewValues(workbook, breakdown);
+        XSSFSheet overview = workbook.createSheet("Overview");
+        overviewTitleBlock(workbook, overview);
+        overviewValues(workbook, overview);
+        overviewImageBlock(workbook, overview);
+        overviewMenu(workbook, overview);
     }
 
     private void overviewTitleBlock(XSSFWorkbook workbook, Sheet sheet) {
@@ -262,7 +256,7 @@ public class StatisticsSheetWriter {
         }
 
         int i = 8;
-        addOverviewStatistic(sheet, i++, "Max Speed", " MPH", "mtr_spd");
+        addOverviewStatistic(sheet, i++, "Top Speed", " MPH", "mtr_spd");
         addOverviewStatistic(sheet, i++, "Remaining Battery", "%", "bms_soc");
         addOverviewStatistic(sheet, i++, "MC0 Top Current", " A", "mc0_dc_i");
         addOverviewStatistic(sheet, i++, "MC1 Top Current", " A", "mc1_dc_i");
@@ -285,6 +279,130 @@ public class StatisticsSheetWriter {
 
         setBorder(CellRangeAddress.valueOf(String.format("B%s:C%s", rowNo, rowNo)), sheet);
         setBorder(CellRangeAddress.valueOf(String.format("D%s:E%s", rowNo, rowNo)), sheet);
+    }
+
+    private void overviewImageBlock(XSSFWorkbook workbook, Sheet sheet) {
+        sheet.addMergedRegion(CellRangeAddress.valueOf("G2:J8"));
+        Row row = sheet.getRow(1);
+        Cell imageDescription = row.createCell(6);
+        imageDescription.setCellValue("Cabinet Logging System by Noah Husby");
+        {
+            XSSFCellStyle style = workbook.createCellStyle();
+            XSSFFont font = workbook.createFont();
+            font.setFontHeightInPoints((short) 9);
+            byte[] rgb = { (byte) 187, 2, 0 };
+            font.setColor(new XSSFColor(rgb, new DefaultIndexedColorMap()));
+            style.setFont(font);
+            style.setAlignment(HorizontalAlignment.CENTER);
+            imageDescription.setCellStyle(style);
+        }
+
+        {
+            /*
+            final InputStream stream = getClass().getClassLoader().getResourceAsStream("public/images/logo.png");
+            final CreationHelper helper = workbook.getCreationHelper();
+            final Drawing<?> drawing = sheet.createDrawingPatriarch();
+
+            final ClientAnchor anchor = helper.createClientAnchor();
+            anchor.setCol1(6);
+            anchor.setRow1(1);
+            anchor.setCol2(10);
+            anchor.setRow2(4);
+            try {
+                final int pictureIndex = workbook.addPicture(IOUtils.toByteArray(stream), Workbook.PICTURE_TYPE_PNG);
+                final Picture pict = drawing.createPicture(anchor, pictureIndex);
+                ClientAnchor test = pict.getPreferredSize();
+                int padding = (int) Math.floor((pict.getPreferredSize().getDx2() * 0.07) / 2);
+                anchor.setDx1(padding);
+                anchor.setDx2(anchor.getDx2() - padding);
+                System.out.println(test.getDx1() + ", " + test.getDx2());
+                System.out.println(test.getDy1() + ", " + test.getDy2());
+            } catch (IOException e) {
+                Cabinet.getLogger().error("Failed to add image", e);
+            }
+
+
+             */
+
+        }
+        setBorder(CellRangeAddress.valueOf("G2:J8"), sheet);
+    }
+
+    private void overviewMenu(XSSFWorkbook workbook, Sheet sheet) {
+        Row r9 = sheet.getRow(9);
+        Cell header = r9.createCell(6);
+        header.setCellValue("Menu");
+        {
+            sheet.addMergedRegion(CellRangeAddress.valueOf("G10:J10"));
+            CellStyle style = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            style.setFont(font);
+            style.setAlignment(HorizontalAlignment.CENTER);
+            header.setCellStyle(style);
+        }
+        addOverviewMenu(sheet, 11, "Overview", "An overview of the session");
+        addOverviewMenu(sheet, 12, "Visual", "Graphical rendering of data");
+        addOverviewMenu(sheet, 13, "Raw", "Raw recorded data");
+
+        setBorder(CellRangeAddress.valueOf("G10:J13"), sheet);
+    }
+
+    private void addOverviewMenu(Sheet sheet, int rowNo, String name, String description) {
+        sheet.addMergedRegion(CellRangeAddress.valueOf(String.format("H%s:J%s", rowNo, rowNo)));
+        Row row = sheet.getRow(rowNo - 1);
+        CreationHelper helper = sheet.getWorkbook().getCreationHelper();
+        XSSFHyperlink link = (XSSFHyperlink) helper.createHyperlink(HyperlinkType.DOCUMENT);
+        link.setAddress(String.format("'%s'!A1", name));
+
+        Cell titleCell = row.createCell(6);
+        titleCell.setCellValue(name);
+        titleCell.setHyperlink(link);
+        formatAsLink(sheet.getWorkbook(), titleCell);
+
+        Cell descriptionCell = row.createCell(7);
+        descriptionCell.setCellValue(description);
+
+        setBorder(CellRangeAddress.valueOf(String.format("G%s:G%s", rowNo, rowNo)), sheet);
+        setBorder(CellRangeAddress.valueOf(String.format("H%s:J%s", rowNo, rowNo)), sheet);
+    }
+
+    /*
+     * Visual
+     */
+
+    private void visual(XSSFWorkbook workbook, Map<String, Integer> headerMap) {
+        XSSFSheet visual = workbook.createSheet("Visual");
+        XSSFSheet raw = workbook.getSheet("Raw");
+
+        // Generate chart
+        XSSFDrawing drawing = visual.createDrawingPatriarch();
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 0, 15, 26);
+        XSSFChart chart = drawing.createChart(anchor);
+        chart.setTitleText("Statistics");
+        chart.setTitleOverlay(false);
+
+        XDDFChartLegend legend = chart.getOrAddLegend();
+        legend.setPosition(LegendPosition.BOTTOM);
+
+        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Time");
+        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Value");
+
+        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+        int rows = raw.getPhysicalNumberOfRows();
+        XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 0, 0));
+
+        for (Map.Entry<String, Integer> e : headerMap.entrySet()) {
+            XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, e.getValue(), e.getValue()));
+            XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(timestamps, dataSource);
+            series.setTitle(statisticsMap.get(e.getKey()), null);
+            series.setSmooth(false);
+            series.setMarkerStyle(MarkerStyle.NONE);
+        }
+
+        chart.plot(data);
     }
 
     private void formatAsLink(Workbook workbook, Cell cell) {

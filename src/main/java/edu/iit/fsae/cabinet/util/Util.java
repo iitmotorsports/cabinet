@@ -152,7 +152,7 @@ public class Util {
      */
     public static String of(LocalDateTime ldt) {
         ldt = ldt.atZone(ZoneId.systemDefault()).toLocalDateTime();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss a");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
         return ldt.format(formatter);
     }
 }
