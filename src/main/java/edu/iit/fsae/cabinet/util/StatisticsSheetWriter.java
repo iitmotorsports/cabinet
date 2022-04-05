@@ -375,11 +375,48 @@ public class StatisticsSheetWriter {
         XSSFSheet visual = workbook.createSheet("Visual");
         XSSFSheet raw = workbook.getSheet("Raw");
 
-        // Generate chart
+        {
+            addVisualGraph("Speed", "mtr_spd", 0, 0, 15, 26, visual, raw, headerMap);
+        }
+
+        // All Chart
+        {
+            XSSFDrawing drawing = visual.createDrawingPatriarch();
+            XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 15, 0, 30, 26);
+            XSSFChart chart = drawing.createChart(anchor);
+            chart.setTitleText("Statistics");
+            chart.setTitleOverlay(false);
+
+            XDDFChartLegend legend = chart.getOrAddLegend();
+            legend.setPosition(LegendPosition.BOTTOM);
+
+            XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+            bottomAxis.setTitle("Time");
+            XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+            leftAxis.setTitle("Value");
+
+            XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+            int rows = raw.getPhysicalNumberOfRows();
+            XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 0, 0));
+
+            for (Map.Entry<String, Integer> e : headerMap.entrySet()) {
+                XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, e.getValue(), e.getValue()));
+                XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(timestamps, dataSource);
+                series.setTitle(statisticsMap.get(e.getKey()), null);
+                series.setSmooth(false);
+                series.setMarkerStyle(MarkerStyle.NONE);
+            }
+
+            chart.plot(data);
+
+        }
+    }
+
+    private void addVisualGraph(String title, String statistic, int col1, int row1, int col2, int row2, XSSFSheet visual, XSSFSheet raw, Map<String, Integer> headerMap) {
         XSSFDrawing drawing = visual.createDrawingPatriarch();
-        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 0, 15, 26);
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, col1, row1, col2, row2);
         XSSFChart chart = drawing.createChart(anchor);
-        chart.setTitleText("Statistics");
+        chart.setTitleText(title);
         chart.setTitleOverlay(false);
 
         XDDFChartLegend legend = chart.getOrAddLegend();
@@ -394,15 +431,23 @@ public class StatisticsSheetWriter {
         int rows = raw.getPhysicalNumberOfRows();
         XDDFNumericalDataSource<Double> timestamps = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, 0, 0));
 
-        for (Map.Entry<String, Integer> e : headerMap.entrySet()) {
-            XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, e.getValue(), e.getValue()));
-            XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(timestamps, dataSource);
-            series.setTitle(statisticsMap.get(e.getKey()), null);
-            series.setSmooth(false);
-            series.setMarkerStyle(MarkerStyle.NONE);
-        }
+        int speedColumn = getRowFromStatistic(statistic, headerMap);
+        XDDFNumericalDataSource<Double> dataSource = XDDFDataSourcesFactory.fromNumericCellRange(raw, new CellRangeAddress(1, rows - 1, speedColumn, speedColumn));
+        XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(dataSource, timestamps);
+        series.setTitle(statistic, null);
+        series.setSmooth(false);
+        series.setMarkerStyle(MarkerStyle.NONE);
 
         chart.plot(data);
+    }
+
+    private int getRowFromStatistic(String statistic, Map<String, Integer> headerMap) {
+        for (Map.Entry<String, String> e : statisticsMap.entrySet()) {
+            if (e.getValue().equalsIgnoreCase(statistic)) {
+                return headerMap.get(e.getKey());
+            }
+        }
+        return -1;
     }
 
     private void formatAsLink(Workbook workbook, Cell cell) {
