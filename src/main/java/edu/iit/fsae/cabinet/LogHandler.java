@@ -195,8 +195,10 @@ public class LogHandler {
             Cabinet.getLogger().warn("Log file missing. Not loading log: " + parent.getName());
             return;
         }
-        handleLogStatistics(log);
-        handleLogArchive(log);
+        logWorkerThreads.submit(() -> {
+            handleLogStatistics(log);
+            handleLogArchive(log);
+        });
         logs.put(log.getId(), log);
     }
 
