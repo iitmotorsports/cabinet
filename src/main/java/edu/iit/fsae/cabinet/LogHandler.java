@@ -220,7 +220,7 @@ public class LogHandler {
                 return;
             }
             if (stats.exists() && statsMap.exists()) {
-                StatisticsSheetWriter writer = new StatisticsSheetWriter(stats, statsMap);
+                StatisticsSheetWriter writer = new StatisticsSheetWriter(log, stats, statsMap);
                 writer.parse();
                 writer.write(new File(parent, log.getId() + ".xlsx"));
                 log.setDoesSheetExist(true);

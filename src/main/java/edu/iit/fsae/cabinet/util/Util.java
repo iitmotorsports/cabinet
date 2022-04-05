@@ -29,6 +29,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -139,5 +142,17 @@ public class Util {
                 return null;
             }
         };
+    }
+
+    /**
+     * Converts LocalDateTime to date string.
+     *
+     * @param ldt {@link LocalDateTime} to be formatted.
+     * @return LocalDateTime formatted as a string.
+     */
+    public static String of(LocalDateTime ldt) {
+        ldt = ldt.atZone(ZoneId.systemDefault()).toLocalDateTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss a");
+        return ldt.format(formatter);
     }
 }
