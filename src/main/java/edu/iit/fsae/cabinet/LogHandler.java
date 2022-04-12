@@ -169,6 +169,8 @@ public class LogHandler {
         File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
         File logFile = new File(parent, log.getId() + ".txt");
         FileUtil.streamToFile(uploadedLogFile.getContent(), logFile.getAbsolutePath());
+        // Temporary size while sheet is generated
+        log.setSize(Util.humanReadableBytes(logFile.length()));
         if (uploadedStatsFile != null) {
             File statsFile = new File(parent, log.getId() + ".stats");
             File statsMapFile = new File(parent, log.getId() + ".map.stats");
@@ -196,6 +198,8 @@ public class LogHandler {
             return;
         }
         logWorkerThreads.submit(() -> {
+            // Temporary size whilst statistics are being handled
+            log.setSize(Util.humanReadableBytes(0));
             handleLogStatistics(log);
             handleLogArchive(log);
         });
