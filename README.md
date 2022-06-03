@@ -6,17 +6,17 @@
   <b>A web-based logging storage system for Formula SAE teams.</b>
 </p>
 
-[![](https://github.com/illinois-tech-motorsports/cabinet/actions/workflows/build.yml/badge.svg)](https://github.com/illinois-tech-motorsports/cabinet/actions/workflows/build.yml)
-[![](https://github.com/illinois-tech-motorsports/cabinet/actions/workflows/docker.yml/badge.svg)](https://github.com/illinois-tech-motorsports/cabinet/actions/workflows/docker.yml)
-[![](https://img.shields.io/github/license/illinois-tech-motorsports/cabinet)](https://github.com/illinois-tech-motorsports/cabinet/blob/main/LICENSE)
-[![](https://img.shields.io/tokei/lines/github/illinois-tech-motorsports/cabinet)](https://github.com/illinois-tech-motorsports/cabinet)
+[![](https://github.com/iitmotorsports/cabinet/actions/workflows/build.yml/badge.svg)](https://github.com/iitmotorsports/cabinet/actions/workflows/build.yml)
+[![](https://github.com/iitmotorsports/cabinet/actions/workflows/docker.yml/badge.svg)](https://github.com/iitmotorsports/cabinet/actions/workflows/docker.yml)
+[![](https://img.shields.io/github/license/iitmotorsports/cabinet)](https://github.com/iitmotorsports/cabinet/blob/main/LICENSE)
+[![](https://img.shields.io/tokei/lines/github/iitmotorsports/cabinet)](https://github.com/iitmotorsports/cabinet)
 </div>
 
 ## About
 
 Cabinet is a web-based storage system for log files and statistics. The concept behind cabinet was to provide an
 all-in-one file server, statistic parser, and GUI. Logs from
-the [dashboard](https://github.com/illinois-tech-motorsports/dashboard-2022) app are recorded and then uploaded to the
+the [dashboard](https://github.com/iitmotorsports/dashboard-2022) app are recorded and then uploaded to the
 cabinet server. Each post includes a plain-text file of the console output, a binary file which tracks statistics from
 the car, and a mapping file to map the statistics to a pretty name.
 
