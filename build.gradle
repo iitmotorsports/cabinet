@@ -15,7 +15,7 @@ ext {
     gsonVersion = "2.9.0"
     jacksonVersion = "2.13.2"
     poiVersion = "5.2.2"
-    log4jToSlf4jVersion = "2.17.2"
+    log4jToSlf4jVersion = "2.18.0"
 }
 
 repositories {
