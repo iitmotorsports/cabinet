@@ -28,8 +28,7 @@ import io.javalin.http.NotFoundResponse;
 import io.javalin.http.UploadedFile;
 import io.javalin.http.staticfiles.Location;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.time.Instant;
@@ -39,16 +38,11 @@ import java.time.ZoneOffset;
 /**
  * @author Noah Husby
  */
+@Slf4j
 public class Cabinet {
 
-    private static Cabinet instance = null;
-
-    public static Cabinet getInstance() {
-        return instance == null ? instance = new Cabinet() : instance;
-    }
-
     @Getter
-    public static Logger logger = LoggerFactory.getLogger(Cabinet.class);
+    private static final Cabinet instance = new Cabinet();
 
     private final Javalin app;
 
@@ -62,9 +56,9 @@ public class Cabinet {
         }
         folder = new File(filesDirectory, "logs");
         if (folder.mkdirs()) {
-            logger.info("Storage directory does not exist. Creating at: " + filesDirectory);
+            log.info("Storage directory does not exist. Creating at: {}", filesDirectory);
         }
-        app = configure();
+        app = configure(folder);
     }
 
     /**
@@ -72,7 +66,7 @@ public class Cabinet {
      */
     private void start() {
         LogHandler.getInstance().load();
-        logger.info("Starting server...");
+        log.info("Starting server...");
         app.start(80);
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
     }
@@ -82,7 +76,7 @@ public class Cabinet {
      *
      * @return {@link Javalin}
      */
-    private Javalin configure() {
+    private static Javalin configure(File folder) {
         Javalin app = Javalin.create(config -> {
             config.showJavalinBanner = false;
             config.addStaticFiles("/public", Location.CLASSPATH);

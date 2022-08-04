@@ -27,6 +27,7 @@ import edu.iit.fsae.cabinet.util.Util;
 import io.javalin.core.util.FileUtil;
 import io.javalin.http.UploadedFile;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,6 +47,7 @@ import java.util.concurrent.Executors;
  *
  * @author Noah Husby
  */
+@Slf4j
 public class LogHandler {
     @Getter
     private static final LogHandler instance = new LogHandler();
@@ -84,26 +86,26 @@ public class LogHandler {
      * Loads logs from set working directory.
      */
     public void load() {
-        Cabinet.getLogger().info("Loading logs...");
+        log.info("Loading logs...");
         File logDir = Cabinet.getInstance().getFolder();
         for (File file : Objects.requireNonNull(logDir.listFiles())) {
             if (file.isFile()) {
-                Cabinet.getLogger().warn("Unknown file in log directory: " + file.getName());
+                log.warn("Unknown file in log directory: {}", file.getName());
             } else {
                 String directoryName = file.getName();
                 if (!Util.isInteger(directoryName)) {
-                    Cabinet.getLogger().warn("Non-indexed folder in directory: " + file.getName());
+                    log.warn("Non-indexed folder in directory: {}", file.getName());
                     continue;
                 }
                 File manifest = new File(file, "manifest.json");
                 if (!manifest.exists()) {
-                    Cabinet.getLogger().warn("No manifest for log in directory: " + file.getName());
+                    log.warn("No manifest for log in directory: {}", file.getName());
                     continue;
                 }
                 loadLogFromManifest(file, manifest);
             }
         }
-        Cabinet.getLogger().info(String.format("Loaded %d logs", logs.size()));
+        log.info("Loaded {} logs", logs.size());
     }
 
     /**
@@ -121,7 +123,7 @@ public class LogHandler {
             i++;
         }
         Log log = new Log(i, date, LocalDateTime.now());
-        Cabinet.getLogger().info("Uploaded new log: " + log.getId() + " (w/ log" + (statsFile != null ? " & stats)" : ")"));
+        LogHandler.log.info("Uploaded new log: {} (w/ {})", log.getId(), "log" + (statsFile != null ? " & stats" : ""));
         logWorkerThreads.submit(() -> {
             saveLogToManifest(log);
             saveLogFiles(log, logFile, statsFile, statsMapFile);
@@ -141,20 +143,12 @@ public class LogHandler {
         File parent = new File(Cabinet.getInstance().getFolder(), String.valueOf(log.getId()));
         File manifestFile = new File(parent, "manifest.json");
         parent.mkdirs();
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(manifestFile);
-            Constants.EXPOSED_GSON.toJson(log, writer);
+        try (
+                FileWriter writer = new FileWriter(manifestFile);
+        ) {
+            Constants.GSON.toJson(log, writer);
         } catch (IOException e) {
-            Cabinet.getLogger().error("Failed to write manifest file for: " + log.getId(), e);
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            LogHandler.log.error("Failed to write manifest file for: {}", log.getId(), e);
         }
     }
 
@@ -194,7 +188,7 @@ public class LogHandler {
             return;
         }
         if (!Util.doesChildFileExist(parent, log.getId() + ".txt")) {
-            Cabinet.getLogger().warn("Log file missing. Not loading log: " + parent.getName());
+            LogHandler.log.warn("Log file missing. Not loading log: {}", parent.getName());
             return;
         }
         logWorkerThreads.submit(() -> {
@@ -223,15 +217,15 @@ public class LogHandler {
             }
             if (stats.exists() && statsMap.exists()) {
                 long start = System.currentTimeMillis();
-                Cabinet.getLogger().info("Generating excel sheet for Log #" + log.getId() + " ...");
+                LogHandler.log.info("Generating excel sheet for Log #{} ...", log.getId());
                 StatisticsSheetWriter writer = new StatisticsSheetWriter(log, stats, statsMap);
                 writer.parse();
                 writer.write(new File(parent, log.getId() + ".xlsx"));
-                Cabinet.getLogger().info("Finished generating excel sheet in " + (System.currentTimeMillis() - start) + " ms.");
+                LogHandler.log.info("Finished generating excel sheet in {} ms.", (System.currentTimeMillis() - start));
                 log.setDoesSheetExist(true);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LogHandler.log.error("Error while handling log statistics.", e);
         }
     }
 
@@ -247,7 +241,7 @@ public class LogHandler {
             try {
                 Util.zipFolder(parent, zip);
             } catch (IOException e) {
-                Cabinet.getLogger().warn("Failed to zip log: " + log.getId(), e);
+                LogHandler.log.warn("Failed to zip log: {}", log.getId(), e);
             }
         }
         log.setSize(Util.humanReadableBytes(zip.length()));

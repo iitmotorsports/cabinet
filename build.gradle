@@ -42,7 +42,7 @@ shadowJar {
 }
 
 sonarqube {
-  properties {
-    property "sonar.projectKey", "iitmotorsports_cabinet_AYJnFHPcAstP5YmHRNbj"
-  }
+    properties {
+        property "sonar.projectKey", "iitmotorsports_cabinet_AYJnFHPcAstP5YmHRNbj"
+    }
 }

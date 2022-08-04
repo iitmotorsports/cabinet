@@ -27,6 +27,7 @@ import edu.iit.fsae.cabinet.util.tracking.LastTrackingPolicy;
 import edu.iit.fsae.cabinet.util.tracking.MaxTrackingPolicy;
 import edu.iit.fsae.cabinet.util.tracking.TrackingPolicy;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -76,24 +77,33 @@ import java.util.TreeMap;
  * @author Noah Husby
  */
 @RequiredArgsConstructor
+@Slf4j
 public class StatisticsSheetWriter {
 
-    private final Log log;
+    private final Log logMetadata;
     private final File statisticsFile;
     private final File statisticsMapFile;
     private Map<String, String> statisticsMap;
     private Map<Long, Map<String, Integer>> statistics;
 
-    private final static Type statMapType = new TypeToken<Map<String, String>>() {}.getType();
+    private static final Type statMapType = new TypeToken<Map<String, String>>() {}.getType();
     private final Map<String, TrackingPolicy> trackedStatistics = new HashMap<>();
+    private static final String OVERVIEW_PAGE = "Overview";
+
+    private static final String MOTOR_SPEED = "mtr_spd";
+    private static final String STATE_OF_CHARGE = "bms_soc";
+    private static final String MOTOR_CONTROLLER_0_CURRENT = "mc0_dc_i";
+    private static final String MOTOR_CONTROLLER_1_CURRENT = "mc1_dc_i";
+    private static final String MOTOR_CONTROLLER_0_TEMP = "mc0_mtr_tmp";
+    private static final String MOTOR_CONTROLLER_1_TEMP = "mc1_mtr_tmp";
 
     private void setupTrackers() {
-        trackedStatistics.put("mtr_spd", new MaxTrackingPolicy());
-        trackedStatistics.put("bms_soc", new LastTrackingPolicy());
-        trackedStatistics.put("mc0_dc_i", new MaxTrackingPolicy());
-        trackedStatistics.put("mc1_dc_i", new MaxTrackingPolicy());
-        trackedStatistics.put("mc0_mtr_tmp", new MaxTrackingPolicy());
-        trackedStatistics.put("mc1_mtr_tmp", new MaxTrackingPolicy());
+        trackedStatistics.put(MOTOR_SPEED, new MaxTrackingPolicy());
+        trackedStatistics.put(STATE_OF_CHARGE, new LastTrackingPolicy());
+        trackedStatistics.put(MOTOR_CONTROLLER_0_CURRENT, new MaxTrackingPolicy());
+        trackedStatistics.put(MOTOR_CONTROLLER_1_CURRENT, new MaxTrackingPolicy());
+        trackedStatistics.put(MOTOR_CONTROLLER_0_TEMP, new MaxTrackingPolicy());
+        trackedStatistics.put(MOTOR_CONTROLLER_1_TEMP, new MaxTrackingPolicy());
     }
 
     /**
@@ -105,20 +115,26 @@ public class StatisticsSheetWriter {
         statisticsMap = Constants.GSON.fromJson(statMapReader, statMapType);
         statMapReader.close();
         statistics = new TreeMap<>();
-        BufferedReader reader = new BufferedReader(new FileReader(statisticsFile));
-        String line = reader.readLine();
-        while (line != null) {
-            String[] statArray = line.split(" ");
-            long timestamp = Long.parseLong(statArray[0]);
-            int value = Integer.parseInt(statArray[2]);
-            statistics.putIfAbsent(timestamp, new HashMap<>());
-            statistics.get(timestamp).put(statArray[1], value);
-            TrackingPolicy policy = trackedStatistics.get(statisticsMap.get(statArray[1]));
-            if (policy != null) {
-                policy.post(value);
+        try (
+                BufferedReader reader = new BufferedReader(new FileReader(statisticsFile));
+        ) {
+            String line = reader.readLine();
+            while (line != null) {
+                String[] statArray = line.split(" ");
+                long timestamp = Long.parseLong(statArray[0]);
+                int value = Integer.parseInt(statArray[2]);
+                statistics.putIfAbsent(timestamp, new HashMap<>());
+                statistics.get(timestamp).put(statArray[1], value);
+                TrackingPolicy policy = trackedStatistics.get(statisticsMap.get(statArray[1]));
+                if (policy != null) {
+                    policy.post(value);
+                }
+                line = reader.readLine();
             }
-            line = reader.readLine();
+        } catch (IOException e) {
+            log.error("Failed to parse log file for statistics.", e);
         }
+
 
         // Normalize data
         Map<String, Integer> lastRowStat = null;
@@ -170,6 +186,7 @@ public class StatisticsSheetWriter {
                 try {
                     row.createCell(headerMap.get(e2.getKey())).setCellValue(e2.getValue());
                 } catch (NullPointerException ignored) {
+                    // Failed to create row. Ignoring and moving on.
                 }
             }
             currentRow++;
@@ -193,7 +210,7 @@ public class StatisticsSheetWriter {
      * @param workbook The current session's workbook.
      */
     private void overview(XSSFWorkbook workbook) {
-        XSSFSheet overview = workbook.createSheet("Overview");
+        XSSFSheet overview = workbook.createSheet(OVERVIEW_PAGE);
         overviewTitleBlock(workbook, overview);
         overviewValues(workbook, overview);
         overviewImageBlock(workbook, overview);
@@ -215,35 +232,34 @@ public class StatisticsSheetWriter {
         // Header Row
         Row r2 = sheet.createRow(1);
         Cell header = r2.createCell(1);
-        header.setCellValue("Log #" + log.getId());
-        {
-            CellStyle style = workbook.createCellStyle();
-            Font font = workbook.createFont();
-            font.setBold(true);
-            style.setFont(font);
-            style.setAlignment(HorizontalAlignment.CENTER);
-            header.setCellStyle(style);
-        }
+        header.setCellValue("Log #" + logMetadata.getId());
+
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        header.setCellStyle(style);
 
         // Creation Date Row
         Row r3 = sheet.createRow(2);
         Cell created = r3.createCell(1);
         created.setCellValue("Created:");
         Cell createdValue = r3.createCell(2);
-        createdValue.setCellValue(Util.of(log.getDate()));
+        createdValue.setCellValue(Util.of(logMetadata.getDate()));
 
         // Uploaded Date Row
         Row r4 = sheet.createRow(3);
         Cell uploaded = r4.createCell(1);
         uploaded.setCellValue("Uploaded:");
         Cell uploadedValue = r4.createCell(2);
-        uploadedValue.setCellValue(Util.of(log.getUploadDate()));
+        uploadedValue.setCellValue(Util.of(logMetadata.getUploadDate()));
 
         // Open Link Row
         Row r5 = sheet.createRow(4);
         CreationHelper helper = workbook.getCreationHelper();
         XSSFHyperlink link = (XSSFHyperlink) helper.createHyperlink(HyperlinkType.URL);
-        link.setAddress(String.format("https://logs.iitmotorsports.org/files/%d/%d.txt", log.getId(), log.getId()));
+        link.setAddress(String.format("https://logs.iitmotorsports.org/files/%d/%d.txt", logMetadata.getId(), logMetadata.getId()));
 
         Cell openLog = r5.createCell(1);
         openLog.setCellValue("Open Log");
@@ -267,24 +283,23 @@ public class StatisticsSheetWriter {
     private void overviewValues(XSSFWorkbook workbook, Sheet sheet) {
         Row r6 = sheet.createRow(6);
         Cell header = r6.createCell(1);
-        header.setCellValue("Overview");
-        {
-            sheet.addMergedRegion(CellRangeAddress.valueOf("B7:E7"));
-            CellStyle style = workbook.createCellStyle();
-            Font font = workbook.createFont();
-            font.setBold(true);
-            style.setFont(font);
-            style.setAlignment(HorizontalAlignment.CENTER);
-            header.setCellStyle(style);
-        }
+        header.setCellValue(OVERVIEW_PAGE);
+
+        sheet.addMergedRegion(CellRangeAddress.valueOf("B7:E7"));
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        header.setCellStyle(style);
 
         int i = 8;
-        addOverviewStatistic(sheet, i++, "Top Speed", " MPH", "mtr_spd");
-        addOverviewStatistic(sheet, i++, "Remaining Battery", "%", "bms_soc");
-        addOverviewStatistic(sheet, i++, "MC0 Top Current", " A", "mc0_dc_i");
-        addOverviewStatistic(sheet, i++, "MC1 Top Current", " A", "mc1_dc_i");
-        addOverviewStatistic(sheet, i++, "M0 Top Temp", " \u02DAC", "mc0_mtr_tmp");
-        addOverviewStatistic(sheet, i++, "M1 Top Temp", " \u02DAC", "mc1_mtr_tmp");
+        addOverviewStatistic(sheet, i++, "Top Speed", " MPH", MOTOR_SPEED);
+        addOverviewStatistic(sheet, i++, "Remaining Battery", "%", STATE_OF_CHARGE);
+        addOverviewStatistic(sheet, i++, "MC0 Top Current", " A", MOTOR_CONTROLLER_0_CURRENT);
+        addOverviewStatistic(sheet, i++, "MC1 Top Current", " A", MOTOR_CONTROLLER_1_CURRENT);
+        addOverviewStatistic(sheet, i++, "M0 Top Temp", " \u02DAC", MOTOR_CONTROLLER_0_TEMP);
+        addOverviewStatistic(sheet, i++, "M1 Top Temp", " \u02DAC", MOTOR_CONTROLLER_1_TEMP);
 
         setBorder(CellRangeAddress.valueOf("B7:E" + (i - 1)), sheet);
     }
@@ -324,47 +339,18 @@ public class StatisticsSheetWriter {
         Row row = sheet.getRow(1);
         Cell imageDescription = row.createCell(6);
         imageDescription.setCellValue("Cabinet Logging System by Noah Husby");
-        {
-            XSSFCellStyle style = workbook.createCellStyle();
-            XSSFFont font = workbook.createFont();
-            font.setFontHeightInPoints((short) 9);
-            byte[] rgb = { (byte) 187, 2, 0 };
-            font.setColor(new XSSFColor(rgb, new DefaultIndexedColorMap()));
-            style.setFont(font);
-            // TODO: Remove vertical alignment once logo is fixed.
-            style.setVerticalAlignment(VerticalAlignment.CENTER);
-            style.setAlignment(HorizontalAlignment.CENTER);
-            imageDescription.setCellStyle(style);
-        }
 
-        {
-            /*
-            final InputStream stream = getClass().getClassLoader().getResourceAsStream("public/images/logo.png");
-            final CreationHelper helper = workbook.getCreationHelper();
-            final Drawing<?> drawing = sheet.createDrawingPatriarch();
+        XSSFCellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeightInPoints((short) 9);
+        byte[] rgb = { (byte) 187, 2, 0 };
+        font.setColor(new XSSFColor(rgb, new DefaultIndexedColorMap()));
+        style.setFont(font);
+        // TODO: Remove vertical alignment once logo is fixed.
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        imageDescription.setCellStyle(style);
 
-            final ClientAnchor anchor = helper.createClientAnchor();
-            anchor.setCol1(6);
-            anchor.setRow1(1);
-            anchor.setCol2(10);
-            anchor.setRow2(4);
-            try {
-                final int pictureIndex = workbook.addPicture(IOUtils.toByteArray(stream), Workbook.PICTURE_TYPE_PNG);
-                final Picture pict = drawing.createPicture(anchor, pictureIndex);
-                ClientAnchor test = pict.getPreferredSize();
-                int padding = (int) Math.floor((pict.getPreferredSize().getDx2() * 0.07) / 2);
-                anchor.setDx1(padding);
-                anchor.setDx2(anchor.getDx2() - padding);
-                System.out.println(test.getDx1() + ", " + test.getDx2());
-                System.out.println(test.getDy1() + ", " + test.getDy2());
-            } catch (IOException e) {
-                Cabinet.getLogger().error("Failed to add image", e);
-            }
-
-
-             */
-
-        }
         setBorder(CellRangeAddress.valueOf("G2:J8"), sheet);
     }
 
@@ -378,16 +364,16 @@ public class StatisticsSheetWriter {
         Row r9 = sheet.getRow(9);
         Cell header = r9.createCell(6);
         header.setCellValue("Menu");
-        {
-            sheet.addMergedRegion(CellRangeAddress.valueOf("G10:J10"));
-            CellStyle style = workbook.createCellStyle();
-            Font font = workbook.createFont();
-            font.setBold(true);
-            style.setFont(font);
-            style.setAlignment(HorizontalAlignment.CENTER);
-            header.setCellStyle(style);
-        }
-        addOverviewMenu(sheet, 11, "Overview", "An overview of the session");
+
+        sheet.addMergedRegion(CellRangeAddress.valueOf("G10:J10"));
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        header.setCellStyle(style);
+
+        addOverviewMenu(sheet, 11, OVERVIEW_PAGE, "An overview of the session");
         addOverviewMenu(sheet, 12, "Visual", "Graphical rendering of data");
         addOverviewMenu(sheet, 13, "Raw", "Raw recorded data");
 
@@ -435,14 +421,12 @@ public class StatisticsSheetWriter {
         XSSFSheet visual = workbook.createSheet("Visual");
         XSSFSheet raw = workbook.getSheet("Raw");
 
-        {
-            addVisualGraph("Speed", new String[]{ "mtr_spd" }, 0, 0, 15, 26, visual, raw, headerMap);
-            addVisualGraph("Throttle", new String[]{ "pdl_0", "pdl_avg", "pdl_1" }, 15, 0, 30, 26, visual, raw, headerMap);
-            addVisualGraph("MC Current", new String[]{ "mc0_dc_i", "mc1_dc_i" }, 0, 26, 15, 52, visual, raw, headerMap);
-            addVisualGraph("MC Voltage", new String[]{ "mc0_dc_v", "mc1_dc_v" }, 15, 26, 30, 52, visual, raw, headerMap);
-            addVisualGraph("Steering", new String[]{ "steer" }, 0, 52, 15, 78, visual, raw, headerMap);
-            addVisualGraph("State of Charge", new String[]{ "bms_soc" }, 15, 52, 30, 78, visual, raw, headerMap);
-        }
+        addVisualGraph("Speed", new String[]{ MOTOR_SPEED }, 0, 0, 15, 26, visual, raw, headerMap);
+        addVisualGraph("Throttle", new String[]{ "pdl_0", "pdl_avg", "pdl_1" }, 15, 0, 30, 26, visual, raw, headerMap);
+        addVisualGraph("MC Current", new String[]{ MOTOR_CONTROLLER_0_CURRENT, MOTOR_CONTROLLER_1_CURRENT }, 0, 26, 15, 52, visual, raw, headerMap);
+        addVisualGraph("MC Voltage", new String[]{ "mc0_dc_v", "mc1_dc_v" }, 15, 26, 30, 52, visual, raw, headerMap);
+        addVisualGraph("Steering", new String[]{ "steer" }, 0, 52, 15, 78, visual, raw, headerMap);
+        addVisualGraph("State of Charge", new String[]{ STATE_OF_CHARGE }, 15, 52, 30, 78, visual, raw, headerMap);
     }
 
     /**

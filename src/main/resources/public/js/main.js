@@ -22,11 +22,11 @@ $.ajax({
     url: '/api/v1/logs',
     dataType: 'json',
     success: function (data) {
-        for (var i = 0; i < data.length; i++) {
-            var date = new Date(parseInt(data[i].date) * 1000)
-            var row = '<tr><td class="column1">' + data[i].id + '</td><td class="column2">' + date.toLocaleString() + '</td><td class="column3">' + data[i].size + '</td><td class="column4"><ul>';
-            var subDir = '/files/' + data[i].id + "/" + data[i].id;
-            if (data[i].doesSheetExist) {
+        for (const item of data) {
+            const date = new Date(parseInt(item.date) * 1000);
+            let row = '<tr><td class="column1">' + item.id + '</td><td class="column2">' + date.toLocaleString() + '</td><td class="column3">' + item.size + '</td><td class="column4"><ul>';
+            const subDir = '/files/' + item.id + "/" + item.id;
+            if (item.doesSheetExist) {
                 row += '<li><a href="' + subDir + '.xlsx" download title="Download Excel Sheet"><span class="material-icons-outlined">download</span></a></li>';
             }
             row += '<li><a href="' + subDir + '.zip" download title="Download All as ZIP"><span class="material-icons-outlined">folder_zip</span></button></a></li>';

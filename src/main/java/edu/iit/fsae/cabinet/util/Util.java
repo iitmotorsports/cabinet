@@ -21,6 +21,7 @@
 package edu.iit.fsae.cabinet.util;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import java.text.StringCharacterIterator;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -42,6 +43,7 @@ import java.util.zip.ZipOutputStream;
  * @author Noah Husby
  */
 @UtilityClass
+@Slf4j
 public class Util {
     /**
      * Checks if a string can be parsed as an integer
@@ -80,18 +82,20 @@ public class Util {
         Path p = Files.createFile(Paths.get(zipFile.getAbsolutePath()));
         try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
             Path pp = Paths.get(folder.getAbsolutePath());
-            Files.walk(pp)
-                    .filter(path -> !Files.isDirectory(path) && !path.toString().equals(p.toString()))
-                    .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                        try {
-                            zs.putNextEntry(zipEntry);
-                            Files.copy(path, zs);
-                            zs.closeEntry();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+            try (Stream<Path> stream = Files.walk(pp)) {
+                stream.filter(path -> !Files.isDirectory(path) && !path.toString().equals(p.toString()))
+                        .forEach(path -> {
+                                    ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                                    try {
+                                        zs.putNextEntry(zipEntry);
+                                        Files.copy(path, zs);
+                                        zs.closeEntry();
+                                    } catch (IOException e) {
+                                        log.error("Error while zipping folder.", e);
+                                    }
+                                }
+                        );
+            }
         }
     }
 
@@ -114,34 +118,6 @@ public class Util {
         }
         value *= Long.signum(bytes);
         return String.format("%.1f %ciB", value / 1024.0, ci.current());
-    }
-
-    /**
-     * Creates a new entry.
-     *
-     * @param key   Key of entry.
-     * @param value Value of entry.
-     * @param <K>   The type of the key.
-     * @param <V>   The type of the value.
-     * @return {@link Map.Entry}
-     */
-    public static <K, V> Map.Entry<K, V> entry(K key, V value) {
-        return new Map.Entry<>() {
-            @Override
-            public K getKey() {
-                return key;
-            }
-
-            @Override
-            public V getValue() {
-                return value;
-            }
-
-            @Override
-            public V setValue(V value) {
-                return null;
-            }
-        };
     }
 
     /**
