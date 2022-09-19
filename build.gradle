@@ -15,7 +15,7 @@ ext {
     lombokVersion = "1.18.24"
     gsonVersion = "2.9.0"
     jacksonVersion = "2.13.2"
-    poiVersion = "5.2.2"
+    poiVersion = "5.2.3"
     log4jToSlf4jVersion = "2.18.0"
 }
 
