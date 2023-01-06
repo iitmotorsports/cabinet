@@ -13,7 +13,7 @@ ext {
     javalinVersion = "4.6.4"
     logbackVersion = "1.3.0-alpha16"
     lombokVersion = "1.18.24"
-    gsonVersion = "2.9.0"
+    gsonVersion = "2.10.1"
     jacksonVersion = "2.13.2"
     poiVersion = "5.2.2"
     log4jToSlf4jVersion = "2.18.0"
