@@ -90,12 +90,12 @@ public class StatisticsSheetWriter {
     private final Map<String, TrackingPolicy> trackedStatistics = new HashMap<>();
     private static final String OVERVIEW_PAGE = "Overview";
 
-    private static final String MOTOR_SPEED = "mtr_spd";
-    private static final String STATE_OF_CHARGE = "bms_soc";
-    private static final String MOTOR_CONTROLLER_0_CURRENT = "mc0_dc_i";
-    private static final String MOTOR_CONTROLLER_1_CURRENT = "mc1_dc_i";
-    private static final String MOTOR_CONTROLLER_0_TEMP = "mc0_mtr_tmp";
-    private static final String MOTOR_CONTROLLER_1_TEMP = "mc1_mtr_tmp";
+    private static final String MOTOR_SPEED = "SPEEDOMETER";
+    private static final String STATE_OF_CHARGE = "SOC";
+    private static final String MOTOR_CONTROLLER_0_CURRENT = "MC0_CURRENT";
+    private static final String MOTOR_CONTROLLER_1_CURRENT = "MC1_CURRENT";
+    private static final String MOTOR_CONTROLLER_0_TEMP = "MC0_MOTOR_TEMP";
+    private static final String MOTOR_CONTROLLER_1_TEMP = "MC1_MOTOR_TEMP";
 
     private void setupTrackers() {
         trackedStatistics.put(MOTOR_SPEED, new MaxTrackingPolicy());
@@ -422,10 +422,10 @@ public class StatisticsSheetWriter {
         XSSFSheet raw = workbook.getSheet("Raw");
 
         addVisualGraph("Speed", new String[]{ MOTOR_SPEED }, 0, 0, 15, 26, visual, raw, headerMap);
-        addVisualGraph("Throttle", new String[]{ "pdl_0", "pdl_avg", "pdl_1" }, 15, 0, 30, 26, visual, raw, headerMap);
+        addVisualGraph("Throttle", new String[]{ "ACC_1", "ACC_2" }, 15, 0, 30, 26, visual, raw, headerMap);
         addVisualGraph("MC Current", new String[]{ MOTOR_CONTROLLER_0_CURRENT, MOTOR_CONTROLLER_1_CURRENT }, 0, 26, 15, 52, visual, raw, headerMap);
-        addVisualGraph("MC Voltage", new String[]{ "mc0_dc_v", "mc1_dc_v" }, 15, 26, 30, 52, visual, raw, headerMap);
-        addVisualGraph("Steering", new String[]{ "steer" }, 0, 52, 15, 78, visual, raw, headerMap);
+        addVisualGraph("MC Voltage", new String[]{ "MC0_VOLTAGE", "MC1_VOLTAGE" }, 15, 26, 30, 52, visual, raw, headerMap);
+        addVisualGraph("Steering", new String[]{ "STEER" }, 0, 52, 15, 78, visual, raw, headerMap);
         addVisualGraph("State of Charge", new String[]{ STATE_OF_CHARGE }, 15, 52, 30, 78, visual, raw, headerMap);
     }
 
